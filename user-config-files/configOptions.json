@@ -1,0 +1,127 @@
+[
+  {
+    "idOption": "IT-REGIONAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [9.6, 45.3],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 9,
+      "minZoom": 9,
+      "logo": false
+    },
+    "limits": {
+      "xmin": 7.92010,
+      "ymin": 44.60934,
+      "xmax": 11.59936,
+      "ymax": 45.75363,
+      "spatialReference": {"wkid": 4326}
+    }
+  },
+  {
+    "idOption": "SP-REGIONAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [-0.3, 39.3],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 9,
+      "minZoom": 9,
+      "logo": false
+    },
+    "limits": {
+      "xmin": -0.512332491875404,
+      "ymin": 38.617262320112,
+      "xmax": 0.891506288330905,
+      "ymax": 40.9452645175483,
+      "spatialReference": {"wkid": 4326}
+    }
+  },
+  {
+    "idOption": "GK-REGIONAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [22.75674063485911,40.66785573348243],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 9,
+      "minZoom": 9,
+      "logo": false
+    },
+    "limits": {
+      "xmin": 22.4226250642583,
+      "ymin": 40.4451399383469,
+      "xmax": 23.6678764642165,
+      "ymax": 41.230433818342,
+      "spatialReference": {"wkid": 4326}
+    }
+  },
+  {
+    "idOption": "IT-LOCAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [8.639106587462704, 45.217320979340585],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 15,
+      "maxZoom": 18,
+      "minZoom": 8,
+      "logo": false
+    },
+    "limits": {
+      "xmin": 7.9201059444761,
+      "ymin": 44.609345187043,
+      "xmax": 11.5993630993656,
+      "ymax": 45.7536390503324,
+      "spatialReference": {"wkid": 4326}
+    }
+  },
+  {
+    "idOption": "SP-LOCAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [-0.3, 39.3],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 15,
+      "maxZoom": 18,
+      "minZoom": 14,
+      "logo": false
+    },
+    "limits": {
+      "xmin": -0.512332491875404,
+      "ymin": 38.617262320112,
+      "xmax": 0.891506288330905,
+      "ymax": 40.9452645175483,
+      "spatialReference": {"wkid": 4326}
+    }
+  },
+  {
+    "idOption": "GK-LOCAL",
+    "mapOptions": {
+      "basemap": "hybrid",
+      "center": [22.75674063485911,40.66785573348243],
+      "autoResize": true,
+      "sliderStyle": "small",
+      "fadeOnZoom": true,
+      "zoom": 14,
+      "maxZoom": 17,
+      "minZoom": 13,
+      "logo": false
+    },
+    "limits": {
+      "xmin": 22.4226250642583,
+      "ymin": 40.4451399383469,
+      "xmax": 23.6678764642165,
+      "ymax": 41.230433818342,
+      "spatialReference": {"wkid": 4326}
+    }
+  }
+]
+
+

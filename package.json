@@ -1,0 +1,44 @@
+{
+  "name": "ermes-node-server",
+  "version": "0.0.7",
+  "description": "This is the server for the Ermes RESTful API.",
+  "dependencies": {
+    "app-module-path": "^1.0.4",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.14.2",
+    "connect-flash": "^0.1.1",
+    "connect-form": "^0.2.1",
+    "consolidate": "^0.12.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "express-session": "^1.11.1",
+    "jade": "^1.11.0",
+    "lodash": "^4.2.1",
+    "method-override": "^2.1.2",
+    "mongoose": "~3.6.11",
+    "multer": "^0.1.8",
+    "passport": "^0.2.1",
+    "passport-local": "^1.0.0",
+    "path": "^0.11.14",
+    "pg": "^4.4.4",
+    "pg-hstore": "^2.3.2",
+    "request": "^2.57.0",
+    "sequelize": "^3.19.2",
+    "underscore": "^1.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nachomiralles/dataAPI-prototype-refactor.git"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "private": true,
+  "main": "server.js",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "require-reload": "^0.2.2",
+    "supertest": "^1.1.0"
+  }
+}

@@ -1,0 +1,9 @@
+<ul id="irrigationInfo">
+    <li><b>Start Date:</b> <%= new Date(startDate).toDateString() %></li>
+    <li><b>End Date:</b> <%= new Date(endDate).toDateString() %></li>
+    <li><b>Quantity of Water:</b> <%= waterQuantity %><%= quantityOfWaterMeasure %></li>
+    <li><b>Water Hours:</b> <%= waterHours %></li>
+    <li><b>Water Depth:</b> <%= waterDepth %></li>
+    <li><b>Uploading Date:</b> <%= new Date(uploadingDate).toDateString() %></li>
+    <li class="display-none" id="irrigationInfoID"><%= _id %></li>
+</ul>

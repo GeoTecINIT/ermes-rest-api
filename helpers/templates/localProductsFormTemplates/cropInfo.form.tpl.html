@@ -1,0 +1,112 @@
+<form id="form-template" date-product="cropInfo" date-url = "/cropInfos" enctype='application/json'>
+    <div class="form-group">
+        <label>Crop type</label>
+        <select name="cropType" class="form-control" >
+            <% var cropTypes = {
+            'alpha_alpha': "Alpha_alpha",
+            'clover': "Clover",
+            'corn': "Corn",
+            'meadow': "Meadow",
+            'poplar': "Poplar",
+            'rice': "Rice",
+            'set-aside': "Set-aside",
+            'soybean': "Soybean"
+            }
+            for(var value in cropTypes){
+                if (value === cropType) {%>
+                    <option selected value= "<%=value%>" ><%=cropTypes[value]%></option>
+                <%} else { %>
+                    <option value= "<%=value%>" ><%=cropTypes[value]%></option>
+                <%}
+            } %>
+        </select>
+
+    </div>
+
+    <div class="form-group">
+    <label>Rice variety</label>
+    <select name="riceVariety" class="form-control" >
+        <% var riceVarieties = {
+            'null': "----",
+            'alexandros': "Alexandros",
+            'augusto': "Augusto",
+            'axios': "Axios",
+            'bomba': "Bomba",
+            'carnaroli': "Carnaroli",
+            'cl-12': "Cl 12",
+            'cl-26': "Cl 26",
+            'cl-46': "Cl 46",
+            'cl-80': "Cl 80",
+            'clxl745': "Clxl745",
+            'dimitra': "Dimitra",
+            'dion': "Dion",
+            'ecco-61': "Ecco 61",
+            'gladio': "Gladio",
+            'gleva': "Gleva",
+            'luna': "Luna",
+            'mare-cl': "Mare cl",
+            'olympiada': "Olympiada",
+            'opale': "Opale",
+            'ronaldo': "Ronaldo",
+            'roxani': "Roxani",
+            'selenio': "Selenio",
+            'sirio-cl': "Sirio cl",
+            'sole-cl': "Sole cl",
+            'terra-cl': "Terra cl"
+        }
+        for(var value in riceVarieties){
+            if (value === riceVariety) {%>
+                <option selected value= "<%=value%>" ><%=riceVarieties[value]%></option>
+            <%} else { %>
+                <option value= "<%=value%>" ><%=riceVarieties[value]%></option>
+            <%}
+        } %>
+    </select>
+    </div>
+
+    <div class="form-group">
+    <label>Pudding</label>
+    <select name="pudding" class="form-control" >
+        <% var puddings = {
+            'null': "----",
+            'yes': "Yes",
+            'no': "No"
+        }
+        for(var value in puddings){
+            if (value === pudding) {%>
+                <option selected value= "<%=value%>" ><%=puddings[value]%></option>
+            <%} else { %>
+                <option value= "<%=value%>" ><%=puddings[value]%></option>
+            <%}
+        } %>
+    </select>
+    </div>
+
+    <div class="form-group">
+    <label>Sowing practice</label>
+    <select name="sowingPractice" class="form-control" >
+        <% var showingPractices = {
+            'null': "----",
+            'direct-seeding': "Direct seeding",
+            'scattered-seeding': "Scattered seeding"
+        }
+        for(var value in showingPractices){
+            if (value === sowingPractice) {%>
+                <option selected value= "<%=value%>" ><%=showingPractices[value]%></option>
+            <%} else { %>
+                <option value= "<%=value%>" ><%=showingPractices[value]%></option>
+            <%}
+        } %>
+    </select>
+
+    </div>
+
+    <div class="form-group">
+        <label>Sowing date</label>
+        <input class="form-control" type="date" name="date" value="<%= formatDate(date) %>">
+    </div>
+
+    <div class="form-group">
+        <label id="form-put-response-label"></label>
+    </div>
+</form>

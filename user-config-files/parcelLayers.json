@@ -1,0 +1,23 @@
+[
+  {
+    "regionId": "IT",
+    "parcelsLayer":
+      {
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/IT_parcels/MapServer/0"
+      }
+  },
+  {
+    "regionId": "SP",
+    "parcelsLayer":
+      {
+        "url": "http://ermes.dlsi.uji.es:6080/ArcGIS/rest/services/2015-ES/landsat_spain_scene/MapServer/3"
+      }
+  },
+  {
+    "regionId": "GK",
+    "parcelsLayer":
+      {
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-GR/GR_parcels/MapServer/0"
+      }
+  }
+]

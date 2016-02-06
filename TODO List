@@ -1,0 +1,18 @@
+ON IT: Reorganizar Rutas
+
+Separar Imagen de ruta, asociarla en el modelo del producto.
+Parcela devuelve, para cada producto, array de IDs.
+/api requiere sesión (User logged)
+Añadir Sesiones.
+añadir método para cambiar el lenguaje del usuario.
+Mejorar Login/Password, recuperacion de contraseña.
+Cuando recibes el username pasarlo a minúsculas.
+Comprobar Header antes de splitear
+
+DONE: Añadir Lengua al modelo del usuario.
+DONE: Login Devolver idioma.
+DONE: Cuando el usuario se registra dependiendo de la región setear lastposition.
+DONE / Poner CORS
+DONE: Signup, calcular idioma.
+
+

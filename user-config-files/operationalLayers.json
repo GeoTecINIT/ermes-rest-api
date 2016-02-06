@@ -1,0 +1,25 @@
+[
+  {
+    "regionId": "IT",
+    "operationalLayers":[
+      {
+        "configId": "101",
+        "id": "IT Administrative Areas",
+        "name": "IT Administrative Areas",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/Prototype/IT_Vectordata/MapServer/1",
+        "description": "Feature Layer containing boundaries of the municipalities.",
+        "default": false
+      }
+    ]
+  },
+  {
+    "regionId": "SP",
+    "operationalLayers":[
+    ]
+  },
+  {
+    "regionId": "GK",
+    "operationalLayers":[
+    ]
+  }
+]
