@@ -3,11 +3,9 @@ require('app-module-path').addPath(__dirname);
 var express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
-    //mongoose = require("mongoose"), // TODO: Remove once no longer needed
-    //UsersController = require("./controllers/users"),
     passport = require("passport"),
     expressSession = require("express-session"),
-    path = require("path"),
+    os = require('os'),
     //multer  = require('multer'),
     warmDb = require('./controllers/warmDb'),
     sequelize = require('./initializers/db'),
@@ -69,11 +67,7 @@ module.exports = sequelize.initModels({force: process.env.DB_VOLATILE ? true : f
     });
 
     //Start to listen.
-    var server = app.listen(config.http.PORT, function() {
-        var host = server.address().address;
-        var port = server.address().port;
-        console.log('NodeServer for SmartApp working at http://%s:%s', host, port);
+    return app.listen(config.http.PORT, function() {
+        console.log('Express started on http://' + os.hostname() + ':' + config.http.PORT + '; Press Ctrl-C to terminate');
     });
-
-    return server;
 });
