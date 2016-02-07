@@ -11,7 +11,9 @@ var sequelize = new Sequelize(config.SQL.db, config.SQL.auth.user, config.SQL.au
     max: 25,
     min: 0,
     idle: 10000
-  }
+  },
+
+  define: {schema: config.SQL.defaultSchema}
 });
 
 sequelize.initModels = function(syncParameters) {

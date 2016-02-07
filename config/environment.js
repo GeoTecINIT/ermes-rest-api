@@ -8,7 +8,8 @@ var environment = {
     auth: {
       user: 'nodetest',
       pass: 'qwerty12345'
-    }
+    },
+    defaultSchema: 'api'
   }
 };
 

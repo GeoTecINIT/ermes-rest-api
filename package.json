@@ -17,6 +17,7 @@
     "method-override": "^2.1.2",
     "mongoose": "~3.6.11",
     "multer": "^0.1.8",
+    "nodemailer": "^2.1.0",
     "passport": "^0.2.1",
     "passport-local": "^1.0.0",
     "path": "^0.11.14",

@@ -45,11 +45,11 @@ initPassport(passport);
 // Enable cross origin requests for the whole APP
 app.use(cors());
 
-module.exports = sequelize.initModels({force: process.env.DB_VOLATILE ? true : false}).then(() => {
+module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
     "use strict";
 
-    //var root = require('./routes/index')(passport);
-    //app.use('/', root);
+    var root = require('./router')(passport);
+    app.use('/', root);
 
     // Custom 404 page
     app.use(function (req, res) {

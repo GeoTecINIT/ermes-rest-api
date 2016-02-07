@@ -14,13 +14,13 @@ module.exports = function(sequelize, Sequelize) {
     password: {type: Sequelize.STRING, allowNull: false},
     email: {type: Sequelize.STRING, allowNull: false, unique: true, validate: {isEmail: {msg: "FAKE_EMAIL"}}},
     region: {type: Sequelize.STRING(10), allowNull: false},
-    profile: {type: Sequelize.STRING(10), allowNull: false,
+    profile: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
         "use strict";
         this.setDataValue('profile', val.toLowerCase());
       }
     },
-    type: {type: Sequelize.STRING(10), allowNull: false,
+    type: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
         "use strict";
         this.setDataValue('type', val.toLowerCase());
