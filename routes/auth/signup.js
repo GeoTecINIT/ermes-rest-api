@@ -1,5 +1,3 @@
-"use strict";
-
 var express = require('express');
 var router = express.Router();
 var administrators = require('../../user-config-files/administratorsInfo.json');
@@ -24,7 +22,7 @@ module.exports = function(passport){
     });
 
     return router;
-}
+};
 
 function sendMail(emails, res, user){
     console.log(emails);

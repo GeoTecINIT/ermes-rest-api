@@ -4,21 +4,21 @@ module.exports = {
     mongoDbUrl: 'mongodb://localhost/serverermesapp',
     regions: {
         'spain': {
-            "lastX": -0.3,
-            "lastY": 39.3,
-            "zoom": 15,
+            "lastLongitude": -0.3,
+            "lastLatitude": 39.3,
+            "zoomLevel": 15,
             "spatialReference": "4326"
         },
         'italy': {
-            "lastX": 8.64,
-            "lastY": 45.22,
-            "zoom": 15,
+            "lastLongitude": 8.64,
+            "lastLatitude": 45.22,
+            "zoomLevel": 15,
             "spatialReference": "4326"
         },
         'greece':{
-            "lastX": 22.76,
-            "lastY": 40.67,
-            "zoom": 14,
+            "lastLongitude": 22.76,
+            "lastLatitude": 40.67,
+            "zoomLevel": 14,
             "spatialReference": "4326"
         }
     },

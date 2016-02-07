@@ -1,16 +1,41 @@
-'use strict';
-
 var express = require('express');
 var router = express.Router();
-var mongoose = require("mongoose");
+var path = require('path');
+var sequelize = require('../../initializers/db');
+var Parcel = sequelize.import(path.resolve('./models/parcel'));
 var _ = require('underscore');
-//var ProductModel = mongoose.model("Agrochemical");
-//var ProductName = "agrochemical";
-//var ProductCollection = "agrochemicals";
-var Config = require('../../helpers/config');
+var config = require('../../helpers/config');
 
 module.exports = function()
 {
+
+    router.post('/', function(req, res) {
+        if (req.body.parcel && req.body.parcel.parcelId) {
+            req.body.parcel.parcelId = req.body.parcel.parcelId.toLowerCase();
+        }
+        sequelize.transaction((t) => {
+            return Parcel.findOrCreate({where: {parcelId: req.body.parcel.parcelId}, defaults: req.body.parcel, transaction: t})
+              .spread((parcel) => {
+                var user = req.ERMES.user;
+                if (req.ERMES.user.type !== 'owner') {
+                    throw new Error("You have to be an owner to manage parcels");
+                } else {
+                    return parcel.getOwners({transaction: t}).then((owners) => {
+                        owners.push(user);
+                        return parcel.setOwners(owners, {transaction: t}).then(() => {
+                            return parcel;
+                        });
+                    });
+                }
+            });
+        }).then((parcel) => {
+            res.status(201).json({err: false, parcel: _.omit(parcel.get({plain: true}), ['updatedAt', 'createdAt']) });
+        }).catch((ex) => {
+            console.error('ERROR CREATING PARCEL: ' + ex);
+            res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+        });
+    });
+
     router.get('/:parcelId', function(req, res){
         var parcelId = req.params.parcelId;
         var limit = req.query.limit;
@@ -28,11 +53,12 @@ module.exports = function()
         }
 
         // All the products
-        var response = _.pick(parcel, Config.allLocalProducts);
+        var response = _.pick(parcel, config.allLocalProducts);
 
         _.mapObject(response, (value, key) => {
-            if(!_.isArray(value))
+            if(!_.isArray(value)) {
                 return;
+            }
 
             // Sort by uploadingdate
             response[key] =_.chain(response[key])
@@ -45,8 +71,9 @@ module.exports = function()
             parcelId: parcelId
         };
         _.mapObject(response, (value, key) => {
-           if(!_.isArray(value))
+           if(!_.isArray(value)) {
                return;
+           }
             parcel[key] = _.map(response[key], (product) => product._id);
         });
         response.parcel = parcel;
@@ -56,4 +83,4 @@ module.exports = function()
     });
 
     return router;
-}
+};

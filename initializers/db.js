@@ -21,7 +21,6 @@ sequelize.initModels = function(syncParameters) {
   return new Promise(function (resolve, reject) {
     console.log('\nInitializing models...\n=================================');
     fs.readdir('./models', (err, files) => {
-      "use strict";
 
       files.forEach((file) => {
         sequelize.import(path.resolve('./models/' + file));
@@ -29,11 +28,11 @@ sequelize.initModels = function(syncParameters) {
       sequelize.sync(syncParameters)
         .then((res) => {
           console.log('=================================\nInitializing models... DONE\n');
-          resolve(res)
+          resolve(res);
         })
         .catch((err) => {
           console.error('=================================\nInitializing models... ERROR\n' + err);
-          reject(err)
+          reject(err);
         });
     });
   });

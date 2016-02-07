@@ -5,24 +5,25 @@ module.exports = function(sequelize, Sequelize) {
 
   var User = sequelize.define('user', {
     userId: {type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
-    username: {type: Sequelize.STRING, unique: true,
+    username: {type: Sequelize.STRING, unique: true, allowNull: false,
       set: function(val) {
-        "use strict";
         this.setDataValue('username', val.toLowerCase());
       }
     },
     password: {type: Sequelize.STRING, allowNull: false},
     email: {type: Sequelize.STRING, allowNull: false, unique: true, validate: {isEmail: {msg: "FAKE_EMAIL"}}},
-    region: {type: Sequelize.STRING(10), allowNull: false},
+    region: {type: Sequelize.STRING(10), allowNull: false,
+      set: function(val) {
+        this.setDataValue('region', val.toLowerCase());
+      }
+    },
     profile: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
-        "use strict";
         this.setDataValue('profile', val.toLowerCase());
       }
     },
     type: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
-        "use strict";
         this.setDataValue('type', val.toLowerCase());
       }
     },
@@ -30,8 +31,8 @@ module.exports = function(sequelize, Sequelize) {
     active: {type: Sequelize.BOOLEAN, defaultValue: false},
     enableAlerts: {type: Sequelize.BOOLEAN, defaultValue: true},
     enableNotifications: {type: Sequelize.BOOLEAN, defaultValue: true},
-    lastX: Sequelize.DOUBLE, // Nullable
-    lastY: Sequelize.DOUBLE, // Nullable
+    lastLongitude: Sequelize.DOUBLE, // Nullable
+    lastLatitude: Sequelize.DOUBLE, // Nullable
     zoomLevel: Sequelize.INTEGER, // Nullable
     spatialReference: Sequelize.INTEGER // Nullable
   });

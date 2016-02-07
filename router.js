@@ -37,4 +37,4 @@ module.exports = function(passport)
     //router.use("/signup", signup);
 
     return router;
-}
+};

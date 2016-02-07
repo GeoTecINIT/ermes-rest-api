@@ -1,85 +1,87 @@
-'use strict';
 var express = require('express');
 var router = express.Router();
-var mongoose = require("mongoose");
-var User = mongoose.model("User");
-var Parcel = mongoose.model("Parcel");
+var bCrypt = require('bcrypt-nodejs');
 var _ = require('underscore');
+var path = require('path');
+var sequelize = require('../../initializers/db');
+var Parcel = sequelize.import(path.resolve('./models/parcel'));
+var User = sequelize.import(path.resolve('./models/user'));
+
+const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 
 module.exports = function()
 {
 
+    /*
+     ###############################################################
+     ############## USER POST is in /routes/api-v1.js ##############
+     ###############################################################
+     */
+
     router.get('/:username', function(req, res){
         var user = req.ERMES.user;
-        if(user.username!=req.params.username){
-            res.status(403).jsonp({'error': 'Forbidden Access'});
+        if(user.username !== req.params.username.toLowerCase()){
+            res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
         }
         else {
-            var responseParcels = [];
-            var userParcels = user.parcels;
-            for (var j = 0; j < userParcels.length; j++) {
-                responseParcels.push(userParcels[j].parcelId);
-            }
-
-            var newUser = user.toObject();
-            newUser.parcels = responseParcels;
-
-            delete newUser.password;
-            delete newUser["__v"];
-            delete newUser["_id"];
-
-            res.status(200).jsonp({'user': newUser});
+            var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
+            if (user.type === 'owner') {
+              user.getParcels().then((parcels) => {
+                    plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
+                    res.status(200).json({'user': plainUser});
+              });
+          } else {
+              sequelize.transaction((t) => {
+                 return user.getOwners({transaction: t}).then((owners) => {
+                     var ownerIds = _.map(owners, (owner) => owner.userId);
+                     return Parcel.findAll({include: [{
+                         model: User,
+                         as: 'Owners',
+                         where: {userId: {$in: ownerIds}}
+                     }], transaction : t}).then((parcels) => {
+                         plainUser.parcels =  _.map(parcels, (parcel) => parcel.parcelId);
+                         return plainUser;
+                     });
+                 });
+              }).then((user) => {
+                  res.status(200).json({'user': user});
+              }).catch((ex) => {
+                  console.error('ERROR FINDING USER: ' + ex);
+                  res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+              });
+          }
         }
-
     });
 
     router.put('/:username', function(req, res){
         var user = req.ERMES.user;
-        if(user.username!=req.params.username){
-            res.status(403).jsonp({'error': 'Forbidden Access'});
+        if(user.username !== req.params.username){
+            res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
         }
         else {
-            var response = {user: {}};
+            var attributesToChange = _.pick(req.body.user,
+              ['password', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
+            );
 
-            var newUserData = req.body.user;
+            if (attributesToChange.password) {
+                attributesToChange.password = createHash(attributesToChange.password);
+            }
 
-            var listOfAttributesAllowed = ['email', 'profile', 'language', 'lastPosition'];
-            var listOfAttributesReturned = ['username', 'email', 'profile', 'region', 'language', 'lastPosition'];
-
-            var attributesToChange = _.pick(newUserData, listOfAttributesAllowed);
-            user = _.extend(user, attributesToChange);
-
-            user.save();
-
-            var newParcelsId = newUserData.parcels;
-            var oldParcelsId = _.map(user.parcels, (parcel) => parcel.parcelId);
-
-            // Filter user parcels, when they are not in the request parcels
-            user.parcels = _.filter(user.parcels, (parcel) => _.contains(newParcelsId, parcel.parcelId));
-
-            // Find out the ids of the parcels that ar enot in user.parcels
-            var idsToAdd = _.filter(newParcelsId, (newParcelId) => !_.contains(oldParcelsId, newParcelId));
-
-            _.each(idsToAdd, (id) => {
-                var newParcel = new Parcel();
-                newParcel.parcelId = id;
-                user.parcels.push(newParcel);
+            user.update(attributesToChange).then(() => {
+                res.status(200).json(_.omit(user.get({plain: true}), userAttribsToOmit));
+            }).catch((ex) => {
+                console.error('ERROR UPDATING USER: ' + ex);
+                res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
             });
-
-            user.save();
-
-            response.user = _.pick(user, listOfAttributesReturned);
-            response.user.parcels = _.map(user.parcels, (parcel) => parcel.parcelId);
-
-            res.jsonp(response);
         }
 
     });
 
     return router;
 
-}
+};
 
-function manageParcels(userParcels, newParcels){
-
+// Generates hash using bCrypt
+function createHash(password){
+    return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 }

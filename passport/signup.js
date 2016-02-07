@@ -1,5 +1,7 @@
 //This module reacts to the register options and send back a message with the result.
 
+// NO LONGER BEING USED!!!
+
 var LocalStrategy   = require('passport-local').Strategy;
 var User = require('../models/user');
 var bCrypt = require('bcrypt-nodejs');
@@ -12,7 +14,7 @@ module.exports = function(passport){
             },
             function(req, username, password, done) {
 
-                findOrCreateUser = function(){
+                var findOrCreateUser = function(){
                     //Check if the user exists.
                     User.findOne({ 'username' :  username }, function(err, user) {
                         //If error, return with the method DONE.
@@ -65,7 +67,7 @@ module.exports = function(passport){
     var createHash = function(password){
         return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 
-    }
+    };
 
     var calculateLanguage = function(region){
         var regions = {
@@ -73,8 +75,11 @@ module.exports = function(passport){
             'spain': 'es',
             'greece': 'gk'
         };
-        if(!regions[region]) return 'en';
-        return regions[region];
-    }
 
-}
+        if(!regions[region]) {
+            return 'en';
+        }
+        return regions[region];
+    };
+
+};
