@@ -47,7 +47,7 @@ module.exports = function()
                   res.status(200).json({'user': user});
               }).catch((ex) => {
                   console.error('ERROR FINDING USER: ' + ex);
-                  res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+                  res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
               });
           }
         }

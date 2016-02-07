@@ -3,8 +3,11 @@ var router = express.Router();
 var path = require('path');
 var sequelize = require('../../initializers/db');
 var Parcel = sequelize.import(path.resolve('./models/parcel'));
+var User = sequelize.import(path.resolve('./models/user'));
 var _ = require('underscore');
 var config = require('../../helpers/config');
+
+const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'Owners'];
 
 module.exports = function()
 {
@@ -29,7 +32,7 @@ module.exports = function()
                 }
             });
         }).then((parcel) => {
-            res.status(201).json({err: false, parcel: _.omit(parcel.get({plain: true}), ['updatedAt', 'createdAt']) });
+            res.status(201).json({err: false, parcel: _.omit(parcel.get({plain: true}), fieldsToOmit) });
         }).catch((ex) => {
             console.error('ERROR CREATING PARCEL: ' + ex);
             res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
@@ -37,49 +40,67 @@ module.exports = function()
     });
 
     router.get('/:parcelId', function(req, res){
-        var parcelId = req.params.parcelId;
-        var limit = req.query.limit;
+        var parcelId = req.params.parcelId.toLowerCase();
+        var limit = req.query.limit || 1;
         var user = req.ERMES.user;
 
-        var parcel = _.find(user.parcels, (parcel) => parcel.parcelId === parcelId);
+            sequelize.transaction((t) => {
+                if (user.type === 'owner') {
+                    return user.getParcels({transaction: t}).then((parcels) => {
+                        var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
+                        if (!parcel) {
+                            throw new Error("Parcel not found or you do not own it");
+                        }
+                        return parcel.get({plain: true});
+                    });
+                } else {
+                    return user.getOwners({transaction: t}).then((owners) => {
+                        var ownerIds = _.map(owners, (owner) => owner.userId);
+                        return Parcel.findAll({
+                            include: [{
+                                model: User,
+                                as: 'Owners',
+                                where: {userId: {$in: ownerIds}}
+                            }], transaction: t
+                        }).then((parcels) => {
+                            var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
+                            if (!parcel) {
+                                throw new Error("Parcel not found");
+                            }
+                            return parcel.get({plain: true});
+                        });
+                    });
+                }
+            }).then((parcel) => {
+                res.status(200).json({err: false, parcel: _.omit(parcel, fieldsToOmit) });
+            }).catch((ex) => {
+                console.error('PARCEL NOT FOUND: ' + parcelId);
+                res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
+            });
 
-        if(_.isUndefined(limit)) {
-            limit = 1;
-        }
+        // TODO Add parcel products
+    });
 
-        if(limit <= 0 || limit > 9999) {
-            res.jsonp({error: "Limit not valid, must be from 0 to 9999"});
-            return;
-        }
+    router.delete('/:parcelId', function(req, res) {
+        var parcelId = req.params.parcelId.toLowerCase();
+        var user = req.ERMES.user;
 
-        // All the products
-        var response = _.pick(parcel, config.allLocalProducts);
-
-        _.mapObject(response, (value, key) => {
-            if(!_.isArray(value)) {
-                return;
-            }
-
-            // Sort by uploadingdate
-            response[key] =_.chain(response[key])
-                                .sortBy((product) => Date.parse(product.uploadingDate) * -1) // Sorcery, by date descending.
-                                .first(limit)
-                                .value();
+        sequelize.transaction((t) => {
+            return user.getParcels({transaction: t}).then((parcels) => {
+                var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
+                if (!parcel) {
+                    throw new Error("Parcel not found or you do not own it");
+                }
+                return parcel.removeOwner(user, {transaction: t}).then(() => {
+                    return parcel;
+                });
+            }).then((parcel) => {
+                res.status(200).json({err: false, parcel: _.omit(parcel.get({plain: true}), fieldsToOmit) });
+            }).catch((ex) => {
+                console.error('PARCEL NOT FOUND: ' + parcelId);
+                res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
+            });
         });
-
-        parcel = {
-            parcelId: parcelId
-        };
-        _.mapObject(response, (value, key) => {
-           if(!_.isArray(value)) {
-               return;
-           }
-            parcel[key] = _.map(response[key], (product) => product._id);
-        });
-        response.parcel = parcel;
-
-
-        res.jsonp(response);
     });
 
     return router;
