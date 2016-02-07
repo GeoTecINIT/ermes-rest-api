@@ -21,7 +21,7 @@ module.exports = function()
     router.get('/:username', function(req, res){
         var user = req.ERMES.user;
         if(user.username !== req.params.username.toLowerCase()){
-            res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
+            res.status(403).json({errors: {name: ['Forbidden', 'You cannot access to this profile']}});
         }
         else {
             var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
@@ -47,7 +47,7 @@ module.exports = function()
                   res.status(200).json({'user': user});
               }).catch((ex) => {
                   console.error('ERROR FINDING USER: ' + ex);
-                  res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
+                  res.status(404).json({errors: {name: [ex.name, ex.message]}});
               });
           }
         }
@@ -71,7 +71,7 @@ module.exports = function()
                 res.status(200).json(_.omit(user.get({plain: true}), userAttribsToOmit));
             }).catch((ex) => {
                 console.error('ERROR UPDATING USER: ' + ex);
-                res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+                res.status(200).json({errors: {name: [ex.name, ex.message]}});
             });
         }
 

@@ -65,10 +65,10 @@ module.exports = function() {
             });
         }).then((user) => {
             //sendMail(administrators, res, user);
-            res.status(201).json({err: false, user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
+            res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
         }).catch((ex) => {
             console.error('ERROR CREATING USER: ' + ex);
-            res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+            res.status(200).json({errors: {name: [ex.name, ex.message]}});
         });
     });
 
@@ -99,11 +99,11 @@ module.exports = function() {
                 next();
             }).catch((ex) => {
                 console.error('ERROR AUTHORIZING USER: ' + ex);
-                res.status(403).json({err: true, content: {name: ex.name, msg: ex.message}});
+                res.status(403).json({errors: {name: [ex.name, ex.message]}});
             });
         }
         else{
-            res.status(403).send("Forbidden Access");
+            res.status(403).json({errors: {name: ['FORBIDDEN ACCESS']}});
         }
     });
 

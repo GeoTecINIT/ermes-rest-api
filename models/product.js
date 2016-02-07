@@ -4,12 +4,12 @@ var Parcel = sequelize.import('./parcel');
 var User = sequelize.import('./user');
 
 module.exports = function(sequelize, Sequelize) {
-  "use strict";
 
   var Product = sequelize.define('product', {
     productId: {type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
     uploadDate: {type: Sequelize.DATE, allowNull: false},
-    shared: {type: Sequelize.BOOLEAN, defaultValue: false}
+    shared: {type: Sequelize.BOOLEAN, defaultValue: false},
+    type: {type: Sequelize.STRING, allowNull:false}
   });
 
   // A product belongs to the user that uploaded it

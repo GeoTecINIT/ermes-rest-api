@@ -23,17 +23,17 @@ module.exports = {
         }
     },
     allLocalProducts: [
-        "agrochemicals",
-        "cropInfos",
-        "cropPhenologies",
-        "diseases",
-        "fertilizers",
-        "irrigations",
-        "observations",
-        "pathogens",
-        "soilConditions",
-        "soilTypes",
-        "weeds",
-        "yields"
+        "agrochemical",
+        "cropInfo",
+        "cropPhenology",
+        "disease",
+        "fertilizer",
+        "irrigation",
+        "observation",
+        "pathogen",
+        "soilCondition",
+        "soilType",
+        "weed",
+        "yield"
     ]
 };

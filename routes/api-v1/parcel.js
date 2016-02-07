@@ -5,6 +5,7 @@ var sequelize = require('../../initializers/db');
 var Parcel = sequelize.import(path.resolve('./models/parcel'));
 var User = sequelize.import(path.resolve('./models/user'));
 var _ = require('underscore');
+_.mixin(require('underscore.inflections'));
 var config = require('../../helpers/config');
 
 const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'Owners'];
@@ -24,21 +25,36 @@ module.exports = function()
                     throw new Error("You have to be an owner to manage parcels");
                 } else {
                     return parcel.getOwners({transaction: t}).then((owners) => {
+                        if (_.find(owners, (owner) => owner.userId === user.userId)){
+                            throw new Error('You already own that parcel');
+                        }
                         owners.push(user);
                         return parcel.setOwners(owners, {transaction: t}).then(() => {
-                            return parcel;
+                            return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
+                                parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
+                                _.extend(parcel, classifiedProducts);
+                                return parcel;
+                            });
                         });
                     });
                 }
             });
         }).then((parcel) => {
-            res.status(201).json({err: false, parcel: _.omit(parcel.get({plain: true}), fieldsToOmit) });
+            res.status(201).json({parcel: parcel});
         }).catch((ex) => {
             console.error('ERROR CREATING PARCEL: ' + ex);
-            res.status(200).json({err: true, content: {name: ex.name, msg: ex.message}});
+            res.status(200).json({errors: {name: [ex.name, ex.message]}});
         });
     });
 
+    /**
+     * Path params: parcelId (Id of the parcel that we want to obtain)
+     * Query params: limit (number of records)
+     *        -> Options:
+     *            - undefined = 1 record
+     *            - a number = n records
+     *            - "unlimited" = findAll
+     */
     router.get('/:parcelId', function(req, res){
         var parcelId = req.params.parcelId.toLowerCase();
         var limit = req.query.limit || 1;
@@ -46,12 +62,18 @@ module.exports = function()
 
             sequelize.transaction((t) => {
                 if (user.type === 'owner') {
-                    return user.getParcels({transaction: t}).then((parcels) => {
+                    return user.getParcels({include: [{all : true}], transaction: t}).then((parcels) => {
                         var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
                         if (!parcel) {
                             throw new Error("Parcel not found or you do not own it");
                         }
-                        return parcel.get({plain: true});
+                        return Parcel.findOne({where: {parcelId: parcelId}, transaction: t}).then((parcel) => {
+                            return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
+                                parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
+                                _.extend(parcel, classifiedProducts);
+                                return parcel;
+                            });
+                        });
                     });
                 } else {
                     return user.getOwners({transaction: t}).then((owners) => {
@@ -67,15 +89,19 @@ module.exports = function()
                             if (!parcel) {
                                 throw new Error("Parcel not found");
                             }
-                            return parcel.get({plain: true});
+                            return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
+                                parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
+                                _.extend(parcel, classifiedProducts);
+                                return parcel;
+                            });
                         });
                     });
                 }
             }).then((parcel) => {
-                res.status(200).json({err: false, parcel: _.omit(parcel, fieldsToOmit) });
+                res.status(200).json({parcel: parcel });
             }).catch((ex) => {
                 console.error('PARCEL NOT FOUND: ' + parcelId);
-                res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
+                res.status(404).json({errors: {name: [ex.name, ex.message]}});
             });
 
         // TODO Add parcel products
@@ -92,16 +118,32 @@ module.exports = function()
                     throw new Error("Parcel not found or you do not own it");
                 }
                 return parcel.removeOwner(user, {transaction: t}).then(() => {
-                    return parcel;
+                    return Parcel.findOne({where: {parcelId: parcelId}, transaction: t}).then((parcel) => {
+                        return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
+                            parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
+                            _.extend(parcel, classifiedProducts);
+                            return parcel;
+                        });
+                    });
                 });
             }).then((parcel) => {
-                res.status(200).json({err: false, parcel: _.omit(parcel.get({plain: true}), fieldsToOmit) });
+                res.status(200).json({parcel: parcel});
             }).catch((ex) => {
                 console.error('PARCEL NOT FOUND: ' + parcelId);
-                res.status(404).json({err: true, content: {name: ex.name, msg: ex.message}});
+                res.status(404).json({errors: {name: [ex.name, ex.message]}});
             });
         });
     });
 
     return router;
 };
+
+function getClassifiedParcelProductIDs(parcel, t) {
+    return parcel.getProducts({transaction: t}).then((products) => {
+        var classifiedProducts = {};
+        config.allLocalProducts.forEach((productType) => {
+            classifiedProducts[_.pluralize(productType)] = _.map(_.where(products, {type: productType}), (product) => product.productId);
+        });
+        return classifiedProducts;
+    });
+}
