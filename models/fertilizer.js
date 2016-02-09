@@ -6,6 +6,7 @@ module.exports = function(sequelize, Sequelize) {
   "use strict";
 
   var Fertilizer = sequelize.define('fertilizer', {
+    productId: {type: Sequelize.INTEGER, primaryKey: true},
     name: {type: Sequelize.STRING, allowNull: false},
     quantity: {type: Sequelize.FLOAT, allowNull: false},
     nitrogenContent: Sequelize.FLOAT, // Nullable
@@ -15,7 +16,8 @@ module.exports = function(sequelize, Sequelize) {
   });
 
   // Append general product info like: upload date, user who uploaded, parcels where applied, etc.
-  Fertilizer.belongsTo(Product, {foreignKey: {name: 'productId', type: Sequelize.INTEGER, primaryKey: true}});
+  Fertilizer.belongsTo(Product, {foreignKey: 'productId', constraints: false, scope: {type: 'fertilizer'}});
+  Product.hasOne(Fertilizer, {foreignKey: 'productId', constraints: false, as: 'fertilizer'});
 
   return Fertilizer;
 };
