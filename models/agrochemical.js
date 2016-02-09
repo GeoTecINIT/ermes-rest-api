@@ -6,6 +6,7 @@ module.exports = function(sequelize, Sequelize) {
     "use strict";
 
     var Agrochemical = sequelize.define('agrochemical', {
+        productId: {type: Sequelize.INTEGER, primaryKey: true},
         name: {type: Sequelize.STRING, allowNull: false},
         amount: {type: Sequelize.FLOAT, allowNull: false},
         observationDate: {type: Sequelize.DATE, allowNull: false}
