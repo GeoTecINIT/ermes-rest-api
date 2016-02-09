@@ -2,13 +2,15 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var sequelize = require('../../initializers/db');
-var Parcel = sequelize.import(path.resolve('./models/parcel'));
-var User = sequelize.import(path.resolve('./models/user'));
 var _ = require('underscore');
 _.mixin(require('underscore.inflections'));
 var config = require('../../helpers/config');
 
-const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'Owners'];
+var Parcel = sequelize.import(path.resolve('./models/parcel'));
+var User = sequelize.import(path.resolve('./models/user'));
+var Alert = sequelize.import(path.resolve('./models/alert'));
+
+const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'owners'];
 
 module.exports = function()
 {
@@ -24,12 +26,11 @@ module.exports = function()
                 if (req.ERMES.user.type !== 'owner') {
                     throw new Error("You have to be an owner to manage parcels");
                 } else {
-                    return parcel.getOwners({transaction: t}).then((owners) => {
-                        if (_.find(owners, (owner) => owner.userId === user.userId)){
+                    return parcel.hasOwner(user, {transaction: t}).then((has) => {
+                        if (has) {
                             throw new Error('You already own that parcel');
                         }
-                        owners.push(user);
-                        return parcel.setOwners(owners, {transaction: t}).then(() => {
+                        return parcel.addOwner(user, {transaction: t}).then(() => {
                             return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
                                 parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
                                 _.extend(parcel, classifiedProducts);
@@ -62,7 +63,7 @@ module.exports = function()
 
             sequelize.transaction((t) => {
                 if (user.type === 'owner') {
-                    return user.getParcels({include: [{all : true}], transaction: t}).then((parcels) => {
+                    return user.getParcels({transaction: t}).then((parcels) => {
                         var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
                         if (!parcel) {
                             throw new Error("Parcel not found or you do not own it");
@@ -81,7 +82,7 @@ module.exports = function()
                         return Parcel.findAll({
                             include: [{
                                 model: User,
-                                as: 'Owners',
+                                as: 'owners',
                                 where: {userId: {$in: ownerIds}}
                             }], transaction: t
                         }).then((parcels) => {
@@ -89,6 +90,7 @@ module.exports = function()
                             if (!parcel) {
                                 throw new Error("Parcel not found");
                             }
+                            // TODO Instead of all products retrieve only last ones
                             return getClassifiedParcelProductIDs(parcel, t).then((classifiedProducts) => {
                                 parcel = _.omit(parcel.get({plain: true}), fieldsToOmit);
                                 _.extend(parcel, classifiedProducts);

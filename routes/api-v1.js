@@ -118,8 +118,8 @@ module.exports = function() {
     //var products = require("./api-v1/products");
     //router.use("/products", products());
 
-    var parcel = require("./api-v1/parcel");
-    router.use("/parcels", parcel());
+    var parcels = require("./api-v1/parcels");
+    router.use("/parcels", parcels());
 
     // TODO handle routing to product image files
     //var uploads = require("./api-v1/uploads")();
