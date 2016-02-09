@@ -36,7 +36,7 @@ module.exports = function()
                      var ownerIds = _.map(owners, (owner) => owner.userId);
                      return Parcel.findAll({include: [{
                          model: User,
-                         as: 'Owners',
+                         as: 'owners',
                          where: {userId: {$in: ownerIds}}
                      }], transaction : t}).then((parcels) => {
                          plainUser.parcels =  _.map(parcels, (parcel) => parcel.parcelId);

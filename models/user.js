@@ -38,8 +38,8 @@ module.exports = function(sequelize, Sequelize) {
   });
 
   // A user can have several collaborators
-  User.belongsToMany(User, {as: 'Owners', through: 'user_collaborators', foreignKey: 'collaboratorId'});
-  User.belongsToMany(User, {as: 'Collaborators', through: 'user_collaborators', foreignKey: 'ownerId'});
+  User.belongsToMany(User, {as: 'owners', through: 'user_collaborators', foreignKey: 'collaboratorId'});
+  User.belongsToMany(User, {as: 'collaborators', through: 'user_collaborators', foreignKey: 'ownerId'});
 
   return User;
 };

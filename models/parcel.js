@@ -11,8 +11,8 @@ module.exports = function(sequelize, Sequelize) {
   });
 
   // A user, if he or she is an owner, can hold many parcels and a parcel can belong to many users
-  User.belongsToMany(Parcel, {as: 'Parcels', through: 'user_parcels', foreignKey: 'ownerId'});
-  Parcel.belongsToMany(User, {as: 'Owners', through: 'user_parcels', foreignKey: 'parcelId'});
+  User.belongsToMany(Parcel, {as: 'parcels', through: 'user_parcels', foreignKey: 'ownerId'});
+  Parcel.belongsToMany(User, {as: 'owners', through: 'user_parcels', foreignKey: 'parcelId'});
 
   return Parcel;
 };
