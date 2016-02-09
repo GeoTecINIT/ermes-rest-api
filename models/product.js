@@ -10,6 +10,12 @@ module.exports = function(sequelize, Sequelize) {
     uploadDate: {type: Sequelize.DATE, allowNull: false},
     shared: {type: Sequelize.BOOLEAN, defaultValue: false},
     type: {type: Sequelize.STRING, allowNull:false}
+  }, {
+    instanceMethods: {
+      getInnerProduct: function() {
+        return this['get' + this.get('type').substr(0, 1).toUpperCase() + this.get('type').substr(1)]();
+      }
+    }
   });
 
   // A product belongs to the user that uploaded it

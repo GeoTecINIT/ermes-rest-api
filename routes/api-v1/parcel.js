@@ -142,7 +142,7 @@ function getClassifiedParcelProductIDs(parcel, t) {
     return parcel.getProducts({transaction: t}).then((products) => {
         var classifiedProducts = {};
         config.allLocalProducts.forEach((productType) => {
-            classifiedProducts[_.pluralize(productType)] = _.map(_.where(products, {type: productType}), (product) => product.productId);
+            classifiedProducts[_.pluralize(productType)] = _.map(_.filter(products, (product) => product.type === productType), (product) => product.productId);
         });
         return classifiedProducts;
     });

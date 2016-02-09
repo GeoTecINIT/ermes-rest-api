@@ -12,7 +12,9 @@ module.exports = function(sequelize, Sequelize) {
     });
 
     // Append general product info like: upload date, user who uploaded, parcels where applied, etc.
-    Agrochemical.belongsTo(Product, {foreignKey: {name: 'productId', type: Sequelize.INTEGER, primaryKey: true}});
+    //Agrochemical.belongsTo(Product, {foreignKey: {name: 'productId', type: Sequelize.INTEGER, primaryKey: true}});
+    Agrochemical.belongsTo(Product, {foreignKey: 'productId', constraints: false, scope: {type: 'agrochemical'}});
+    Product.hasOne(Agrochemical, {foreignKey: 'productId', constraints: false, as: 'agrochemical'});
 
     return Agrochemical;
 };
