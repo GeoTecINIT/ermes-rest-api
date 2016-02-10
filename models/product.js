@@ -19,7 +19,8 @@ module.exports = function(sequelize, Sequelize) {
   });
 
   // A product belongs to the user that uploaded it
-  Product.belongsTo(User, {as: 'Users', foreignKey: 'userId'});
+  Product.belongsTo(User, {as: 'user', foreignKey: 'userId'});
+  User.hasMany(Product, {as: 'products', foreignKey: 'userId'});
 
   // A product can be applied to different parcels and a parcel holds different kinds of products
   Product.belongsToMany(Parcel, {as: 'parcels', through: 'parcel_products', foreignKey: 'productId'});
