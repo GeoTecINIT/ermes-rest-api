@@ -136,7 +136,7 @@ function getFullParcelResponse(user, parcel, options) {
             var classifiedProducts = authorizedProducts[0];
             var entireProducts = authorizedProducts[1];
 
-            if (limit && limit !== -1) {
+            if (limit && limit != -1) { // This can come in string format, don't replace with !==
                 _.keys(classifiedProducts).forEach((productType) => {
                     classifiedProducts[productType] = classifiedProducts[productType].slice(0, limit);
                     entireProducts[productType] = entireProducts[productType].slice(0, limit);
