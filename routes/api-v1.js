@@ -18,11 +18,11 @@ module.exports = function() {
      */
 
     // Todo disable this
-    router.get('/users', function(req, res) {
+    /*router.get('/users', function(req, res) {
         User.findAll({include: [{all: true}]}).then((users) => {
             res.json({users: users});
         });
-    });
+    });*/
 
     // User creation, no auth is needed -> A.K.A Signup
     router.post('/users', function (req, res) {
@@ -120,7 +120,6 @@ module.exports = function() {
     var users = require("./api-v1/users");
     router.use("/users", users());
 
-    // TODO enable
     var products = require("./api-v1/products");
     router.use("/products", products());
 
