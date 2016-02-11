@@ -27,7 +27,7 @@ module.exports = function() {
     });
 
     router.post('/:productType', function(req, res) {
-        var user = req.ERMES.user;
+        var user = req.user;
         var productType = _.singularize(req.params.productType);
         var parcelIds = _.map(req.body[productType].parcels, (parcel) => parcel.toLowerCase());
         var receivedProduct = _.omit(req.body[productType], ['parcels']);
@@ -90,7 +90,7 @@ module.exports = function() {
                 if (!product) {
                     throw new Error('Not found');
                 }
-                req.ERMES.product = product;
+                req.product = product;
                 next();
             }).catch((ex) => {
                 console.error('PRODUCT NOT FOUND: ' + productId);
@@ -101,8 +101,8 @@ module.exports = function() {
     });
 
     router.get('/:productType/:id', function(req, res) {
-        var user = req.ERMES.user;
-        var product = req.ERMES.product;
+        var user = req.user;
+        var product = req.product;
 
         new Promise((resolve, reject) => {
             if (user.type === 'owner') {
@@ -140,8 +140,8 @@ module.exports = function() {
     });
 
     router.put('/:productType/:id', function(req, res) {
-        var user = req.ERMES.user;
-        var product = req.ERMES.product;
+        var user = req.user;
+        var product = req.product;
 
 
         var updateGeneral = _.pick(req.body[product.type], ['shared']);
@@ -169,8 +169,8 @@ module.exports = function() {
     });
 
     router.delete('/:productType/:id', function(req, res) {
-        var user = req.ERMES.user;
-        var product = req.ERMES.product;
+        var user = req.user;
+        var product = req.product;
 
         sequelize.transaction((t) => {
            if (user.userId !== product.userId) {

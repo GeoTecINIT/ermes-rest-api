@@ -4,12 +4,17 @@ var bCrypt = require('bcrypt-nodejs');
 var _ = require('underscore');
 var path = require('path');
 var sequelize = require('../../initializers/db');
+
+
 var Parcel = sequelize.import(path.resolve('./models/parcel'));
 var User = sequelize.import(path.resolve('./models/user'));
 
+var administrators = require('../../user-config-files/administratorsInfo.json');
+var defaults = require('../../helpers/config');
+
 const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 
-module.exports = function()
+module.exports = function(passport)
 {
 
     /*
@@ -18,8 +23,56 @@ module.exports = function()
      ###############################################################
      */
 
-    router.get('/:username', function(req, res){
-        var user = req.ERMES.user;
+    // User creation, no auth is needed -> A.K.A Signup
+    router.post('/', function (req, res) {
+        sequelize.transaction((t) => {
+
+            if (req.body.user) {
+                var user = req.body.user;
+                if (user.password) {
+                    user.password = createHash(user.password);
+                }
+                if (user.region) {
+                    user.language = calculateLanguage(user.region);
+                    var lastPosition = defaults.regions[user.region];
+                    _.extend(user, lastPosition);
+                }
+            }
+
+            return User.create(req.body.user, {transaction: t}).then((user) => {
+                var owner;
+                if (user.type === "owner") {
+                    return user;
+                } else if (!(owner = req.body.user.collaboratesWith)) {
+                    throw new Error("An owner cannot collaborate");
+                } else {
+                    return User.findOne({where: {username: { $like: owner.toLowerCase()}}},
+                      {transaction: t}).then((owner) => {
+                        if (owner) {
+                            if (owner.type === 'owner') {
+                                return user.setOwners([owner], {transaction: t}).then(() => {
+                                    return user;
+                                });
+                            } else  {
+                                throw new Error('Owner specified is not valid');
+                            }
+                        } else {
+                            throw new Error('Owner does not exist');
+                        }
+                    });
+                }
+            });
+        }).then((user) => {
+            //sendMail(administrators, res, user);
+            res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
+        }).catch((ex) => {
+            console.error('ERROR CREATING USER: ' + ex);
+            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+        });
+    });
+
+    router.get('/:username', passport.authenticate('basic', { session: false }), function(req, res){
+        var user = req.user;
         if(user.username !== req.params.username.toLowerCase()){
             res.status(403).json({errors: {name: ['Forbidden', 'You cannot access to this profile']}});
         }
@@ -53,8 +106,8 @@ module.exports = function()
         }
     });
 
-    router.put('/:username', function(req, res){
-        var user = req.ERMES.user;
+    router.put('/:username', passport.authenticate('basic', {session: false}), function(req, res){
+        var user = req.user;
         if(user.username !== req.params.username){
             res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
         }
@@ -84,4 +137,57 @@ module.exports = function()
 // Generates hash using bCrypt
 function createHash(password){
     return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
+}
+
+// Calculates the language for a determinate region
+function calculateLanguage(region){
+    var regions = {
+        'italy': 'it',
+        'spain': 'es',
+        'greece': 'el'
+    };
+
+    if(!regions[region]) {
+        return 'en';
+    }
+    return regions[region];
+}
+
+// Send a confirmation email
+function sendMail(emails, res, user){
+    console.log(emails);
+    var to = emails;
+    var subject = "New ERMES Registration";
+    var message = "User " + user.username + " is trying to register. ACCEPT OR DECLINE (" + user.email + ")";
+
+    var urlAccept = "http://ermes.dlsi.uji.es:6686/accept-registration?username=" + user.username + "&email=" + user.email + "&accepted=true";
+    var urlDecline = "http://ermes.dlsi.uji.es:6686/accept-registration?username=" + user.username + "&email=" + user.email + "&accepted=false";
+
+    var htmlText = "<p>" + message + "</p>";
+
+    var buttonAccept = "<p><a href=" + urlAccept + ">ACCEPT USER</a></p>";
+    var buttonDecline = "<p><a href=" + urlDecline + ">DECLINE USER</a></p>";
+
+    var htmlContent =  "<br>" + htmlText + "<br>" + buttonAccept + "<br>" + buttonDecline;
+
+    var nodemailer = require("nodemailer");
+
+    var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
+
+    var mailOptions = {
+        from: 'ERMES <ermesmailer@gmail.com>', // sender address
+        to: to,
+        subject: subject,
+        html: htmlContent,
+        text: message
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+            return res.jsonp({"error": "Problem sending confirmation mail."});
+        }
+        res.status(201).send(user.username);
+    });
+
 }

@@ -4,7 +4,6 @@ var express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
     passport = require("passport"),
-    expressSession = require("express-session"),
     os = require('os'),
     //multer  = require('multer'),
     warmDb = require('./controllers/warmDb'),
@@ -30,13 +29,7 @@ app.use(multer({
     //}
 }));*/
 
-//Code to configure passport. The module to handle the authentication.
-app.use(expressSession({ // TODO: Is this really needed?
-    secret: "mySecretKey",
-    resave: false,
-    saveUninitialized: true}));
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Initialize Passport
 var initPassport = require('./passport/init');
@@ -48,8 +41,8 @@ app.use(cors());
 module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
     "use strict";
 
-    var root = require('./router')(passport);
-    app.use('/', root);
+    var root = require('./router');
+    app.use('/', root(passport));
 
     // Custom 404 page
     app.use(function (req, res) {

@@ -8,17 +8,17 @@ module.exports = function(passport)
         res.send("ERMES RESTful API");
     });
 
-    var proxy = require("./routes/proxy")();
-    router.use("/proxy", proxy);
+    var apiV1 = require("./routes/api-v1");
+    router.use("/api-v1", apiV1(passport));
 
-    var config = require("./routes/config")();
-    router.use("/config", config);
+    var proxy = require("./routes/proxy");
+    router.use("/proxy", proxy());
 
-    var mailer = require("./routes/mailer")();
-    router.use("/sendmail", mailer);
+    var config = require("./routes/config");
+    router.use("/config", config());
 
-    var api = require("./routes/api-v1")();
-    router.use("/api-v1", api);
+    var mailer = require("./routes/mailer");
+    router.use("/sendmail", mailer());
 
     // TODO: Change the way of user lookup
     //var acceptRegistration = require("./routes/accept-registration")();
@@ -33,9 +33,6 @@ module.exports = function(passport)
     // TODO Refactor this
     //var login = require("./routes/auth/login")(passport);
     //router.use("/login", login);
-
-    //var signup = require("./routes/auth/signup")(passport);
-    //router.use("/signup", signup);
 
     return router;
 };
