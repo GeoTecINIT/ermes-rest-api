@@ -30,6 +30,7 @@ module.exports = function(passport)
     var formTemplates = require("./routes/form-template")();
     router.use("/form-template", formTemplates);
 
+    // TODO Refactor this
     //var login = require("./routes/auth/login")(passport);
     //router.use("/login", login);
 
