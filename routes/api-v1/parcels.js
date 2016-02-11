@@ -128,6 +128,7 @@ function getFullParcelResponse(user, parcel, options) {
     var t = options.transaction;
     var limit = options.limit;
 
+    // TODO check if it is a collaborator
     return user.getCollaborators({transaction: t}).then((collaborators) => {
         var users = _.map(collaborators, (collaborator) => collaborator.userId);
         users.push(user.userId);
@@ -178,7 +179,7 @@ function getAuthorizedParcelProducts(parcelId, users, transaction) {
 
             // Filter all the products per product type
             entireProducts[productType] = _.map(_.filter(products, (product) => product.type === _.singularize(productType)), (product) => {
-                return product.getInnerProduct().then((innerProduct) => { // THE BAD ONE, if you're asking why this code is so strange, this is the cause
+                return product.getInnerProduct(/*TODO set transaction if needed*/).then((innerProduct) => { // THE BAD ONE, if you're asking why this code is so strange, this is the cause
                     var plainProduct = product.get({plain: true});
                     innerProduct = innerProduct.get({plain: true});
                     _.extend(plainProduct, innerProduct);
