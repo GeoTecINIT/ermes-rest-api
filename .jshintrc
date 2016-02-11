@@ -5,7 +5,8 @@
     "-Promise",
     "module",
     "require",
-    "process"
+    "process",
+    "Buffer"
   ],
   "browser": true,
   "boss": true,

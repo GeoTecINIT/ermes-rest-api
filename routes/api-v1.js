@@ -79,6 +79,10 @@ module.exports = function() {
      */
 
     router.use(function(req, res, next){
+
+        /*if(req.header("Authorization")) {
+            var apiKey = new Buffer(req.header("Authorization").split(' ')[1], 'base64').toString('ascii');*/
+
         if(req.header("X-Auth-Key")) {
             var apiKey = req.header("X-Auth-Key");
 
@@ -99,10 +103,12 @@ module.exports = function() {
                 next();
             }).catch((ex) => {
                 console.error('ERROR AUTHORIZING USER: ' + ex);
+                //res.setHeader('WWW-Authenticate', 'Basic realm="API"');
                 res.status(403).json({errors: {name: [ex.name, ex.message]}});
             });
         }
         else{
+            //res.setHeader('WWW-Authenticate', 'Basic realm="API"');
             res.status(403).json({errors: {name: ['FORBIDDEN ACCESS']}});
         }
     });
@@ -115,8 +121,8 @@ module.exports = function() {
     router.use("/users", users());
 
     // TODO enable
-    //var products = require("./api-v1/products");
-    //router.use("/products", products());
+    var products = require("./api-v1/products");
+    router.use("/products", products());
 
     var parcels = require("./api-v1/parcels");
     router.use("/parcels", parcels());

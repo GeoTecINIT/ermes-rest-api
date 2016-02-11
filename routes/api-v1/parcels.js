@@ -3,7 +3,6 @@ var router = express.Router();
 var path = require('path');
 var sequelize = require('../../initializers/db');
 var _ = require('underscore');
-_.mixin(require('underscore.inflections'));
 var config = require('../../helpers/config');
 
 var Parcel = sequelize.import(path.resolve('./models/parcel'));
@@ -136,7 +135,7 @@ function getFullParcelResponse(user, parcel, options) {
             var classifiedProducts = authorizedProducts[0];
             var entireProducts = authorizedProducts[1];
 
-            if (limit && limit != -1) { // This can come in string format, don't replace with !==
+            if (limit && limit != -1) { // This can comes in string format, don't replace with !==
                 _.keys(classifiedProducts).forEach((productType) => {
                     classifiedProducts[productType] = classifiedProducts[productType].slice(0, limit);
                     entireProducts[productType] = entireProducts[productType].slice(0, limit);
@@ -178,7 +177,7 @@ function getAuthorizedParcelProducts(parcelId, users, transaction) {
         config.allLocalProducts.forEach((productType) => { // For each product type that we offer
 
             // Filter all the products per product type
-            entireProducts[_.pluralize(productType)] = _.map(_.filter(products, (product) => product.type === productType), (product) => {
+            entireProducts[productType] = _.map(_.filter(products, (product) => product.type === _.singularize(productType)), (product) => {
                 return product.getInnerProduct().then((innerProduct) => { // THE BAD ONE, if you're asking why this code is so strange, this is the cause
                     var plainProduct = product.get({plain: true});
                     innerProduct = innerProduct.get({plain: true});
@@ -189,11 +188,11 @@ function getAuthorizedParcelProducts(parcelId, users, transaction) {
             });
 
             // Wait for each innerProduct in this product type to be fulfilled
-            lazyProducts.push(Promise.all(entireProducts[_.pluralize(productType)]).then(() => {
-                entireProducts[_.pluralize(productType)] = _.map(entireProducts[_.pluralize(productType)], (promise) => { // Here we are expecting the fulfillment promise
+            lazyProducts.push(Promise.all(entireProducts[productType]).then(() => {
+                entireProducts[productType] = _.map(entireProducts[productType], (promise) => { // Here we are expecting the fulfillment promise
                     return promise.toJSON().fulfillmentValue; // This is safe, since all().then() is telling us that all promises have finished with a good result
                 });
-                classifiedProducts[_.pluralize(productType)] = _.map(entireProducts[_.pluralize(productType)], (product) => product.productId); // Get the link, map is synchronous
+                classifiedProducts[productType] = _.map(entireProducts[productType], (product) => product.productId); // Get the link, map is synchronous
             }));
         });
         return Promise.all(lazyProducts).then(() => { // Wait for all productTypes to finish their own all() promise
