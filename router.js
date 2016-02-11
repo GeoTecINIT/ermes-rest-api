@@ -21,8 +21,8 @@ module.exports = function(passport)
     router.use("/sendmail", mailer());
 
     // TODO: Change the way of user lookup
-    //var acceptRegistration = require("./routes/accept-registration")();
-    //router.use("/accept-registration", acceptRegistration);
+    //var acceptRegistration = require("./routes/accept-registration");
+    //router.use("/accept-registration", acceptRegistration());
 
     var infoTemplates = require("./routes/info-template")();
     router.use("/info-template", infoTemplates);
@@ -30,9 +30,8 @@ module.exports = function(passport)
     var formTemplates = require("./routes/form-template")();
     router.use("/form-template", formTemplates);
 
-    // TODO Refactor this
-    //var login = require("./routes/auth/login")(passport);
-    //router.use("/login", login);
+    var login = require("./routes/auth/login");
+    router.use("/login", login(passport));
 
     return router;
 };

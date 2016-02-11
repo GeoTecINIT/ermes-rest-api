@@ -61,7 +61,7 @@ module.exports = function() {
                });
            });
         }).then((result) => {
-            buildProduct(res, result, productType);
+            buildProduct(res, result, productType, 201);
         }).catch((ex) => {
             console.error('ERROR CREATING PRODUCT: ' + ex);
             res.status(200).json({errors: {name: [ex.name, ex.message]}});
@@ -131,7 +131,7 @@ module.exports = function() {
                 });
             }
         }).then((result) => {
-            buildProduct(res, result, product.type);
+            buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(401).json({errors: {name: [ex.name, ex.message]}});
@@ -161,7 +161,7 @@ module.exports = function() {
                 });
             }
         }).then((result) => {
-            buildProduct(res, result, product.type);
+            buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(403).json({errors: {name: [ex.name, ex.message]}});
@@ -198,14 +198,14 @@ module.exports = function() {
                });
            }
         }).then((result) => {
-            buildProduct(res, result, product.type);
+            buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(403).json({errors: {name: [ex.name, ex.message]}});
         });
     });
 
-    function buildProduct(res, result, productType) {
+    function buildProduct(res, result, productType, status) {
         var product = result[0].get({plain: true});
         var innerProduct = result[1].get({plain: true});
 
@@ -216,7 +216,7 @@ module.exports = function() {
         // Mixed response
         var response = {};
         response[productType] = product;
-        res.status(201).json(response);
+        res.status(status).json(response);
     }
 
     return router;
