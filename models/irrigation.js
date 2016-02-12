@@ -12,7 +12,7 @@ module.exports = function(sequelize, Sequelize) {
     measureUnit: {type: Sequelize.STRING(6), allowNull: false},
     waterQuantity: {type: Sequelize.INTEGER, allowNull: false},
     waterHours: Sequelize.INTEGER, // Nullable
-    waterDepth: Sequelize.INTEGER // Nullable
+    waterHeight: Sequelize.INTEGER // Nullable
   });
 
   // Append general product info like: upload date, user who uploaded, parcels where applied, etc.

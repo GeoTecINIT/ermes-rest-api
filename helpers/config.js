@@ -23,6 +23,7 @@ module.exports = {
         }
     },
     allLocalProducts: [
+        "abioticStresses",
         "agrochemicals",
         "cropInfos",
         "cropPhenologies",
@@ -30,7 +31,7 @@ module.exports = {
         "fertilizers",
         "irrigations",
         "observations",
-        "pathogens",
+        "insects",
         "soilConditions",
         "soilTypes",
         "weeds",

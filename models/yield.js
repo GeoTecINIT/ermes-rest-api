@@ -9,6 +9,7 @@ module.exports = function(sequelize, Sequelize) {
     productId: {type: Sequelize.INTEGER, primaryKey: true},
     yield: {type:Sequelize.FLOAT, allowNull: false}, // Nullable
     comments: Sequelize.TEXT, // Nullable
+    grainMoisture: Sequelize.FLOAT, // Nullable
     harvestDate: {type: Sequelize.DATE, allowNull: false}
   });
 

@@ -9,8 +9,9 @@ module.exports = function(sequelize, Sequelize) {
     productId: {type: Sequelize.INTEGER, primaryKey: true},
     cropType: {type: Sequelize.STRING, allowNull: false},
     riceVariety: Sequelize.STRING, // Nullable
-    pudding: Sequelize.STRING(4), // Nullable
-    sowingPractice: Sequelize.STRING, // Nullable
+    puddling: Sequelize.STRING(4), // Nullable
+    seedsPerHa: Sequelize.FLOAT, // Nullable
+    sowingType: Sequelize.STRING, // Nullable
     sowingDate: Sequelize.DATE // Nullable
   });
 
