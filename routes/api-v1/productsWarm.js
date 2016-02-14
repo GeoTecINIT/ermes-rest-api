@@ -29,7 +29,9 @@ module.exports = function() {
                    if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                    } else {
-                        resolve(findWARMProducts(user.region, parcelId, attributes, year, doy));
+                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
+                            resolve(warmProducts);
+                        });
                    }
                 });
             } else { // Collaborator
@@ -41,7 +43,9 @@ module.exports = function() {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
-                            resolve(findWARMProducts(user.region, parcelId, attributes, year, doy));
+                            findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
+                                resolve(warmProducts);
+                            });
                         }
                     });
                 });
@@ -101,15 +105,16 @@ module.exports = function() {
                     if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                     } else {
-                        var predictions = findWARMProducts(user.region, parcelId, attributes, year, doy);
-                        var product = [];
-                        predictions.forEach((prediction) => {
-                            var plainPrediction = prediction.get({plain: true});
-                            var formatted = _.pick(plainPrediction, ['doy', 'year']);
-                            formatted.value = plainPrediction[warmClass.column];
-                            product.push(formatted);
+                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
+                            var product = [];
+                            predictions.forEach((prediction) => {
+                                var plainPrediction = prediction.get({plain: true});
+                                var formatted = _.pick(plainPrediction, ['doy', 'year']);
+                                formatted.value = plainPrediction[warmClass.column];
+                                product.push(formatted);
+                            });
+                            resolve(product);
                         });
-                        resolve(product);
                     }
                 });
             } else { // Collaborator
@@ -121,15 +126,16 @@ module.exports = function() {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
-                            var predictions = findWARMProducts(user.region, parcelId, attributes, year, doy);
-                            var product = [];
-                            predictions.forEach((prediction) => {
-                                var plainPrediction = prediction.get({plain: true});
-                                var formatted = _.pick(plainPrediction, ['doy', 'year']);
-                                formatted.value = plainPrediction[warmClass.column];
-                                product.push(formatted);
+                            findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
+                                var product = [];
+                                predictions.forEach((prediction) => {
+                                    var plainPrediction = prediction.get({plain: true});
+                                    var formatted = _.pick(plainPrediction, ['doy', 'year']);
+                                    formatted.value = plainPrediction[warmClass.column];
+                                    product.push(formatted);
+                                });
+                                resolve(product);
                             });
-                            resolve(product);
                         }
                     });
                 });
