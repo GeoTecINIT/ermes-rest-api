@@ -38,7 +38,7 @@ module.exports = function() {
                 user.getOwners().then((owners) => {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
-                    Parcel.findAll({where: {parcelId: parcelId},
+                    Parcel.findAll({where: {parcelId: parcelId}, // TODO check if this works
                         includes: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));

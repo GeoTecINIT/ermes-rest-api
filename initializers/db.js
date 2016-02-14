@@ -21,49 +21,41 @@ sequelize.initModels = function(syncParameters) {
 
   // Initialize local models
   var localInitializer =  new Promise(function (resolve, reject) {
-    console.log('\nInitializing local models...\n=================================');
+    console.log('\t* Initializing local models...');
     fs.readdir('./models/local', (err, files) => {
 
       files.forEach((file) => {
         sequelize.import(path.resolve('./models/local/' + file));
       });
-      sequelize.sync(syncParameters)
-        .then((res) => {
-          console.log('=================================\nInitializing local models... DONE\n');
-          resolve(res);
-        })
-        .catch((err) => {
-          console.error('=================================\nInitializing local models... ERROR\n' + err);
-          reject(err);
-        });
+      resolve();
     });
   });
 
   //return localInitializer;
 
   var warmInitializer =  new Promise(function (resolve, reject) {
-    console.log('\nInitializing WARM models...\n=================================');
+    console.log('\t* Initializing WARM models...');
     fs.readdir('./models/warm', (err, files) => {
 
       files.forEach((file) => {
-        if (!file) {
+        if (!file) { // TODO Remove this
           sequelize.import(path.resolve('./models/warm/' + file));
         }
       });
-      sequelize.sync()
-        .then((res) => {
-          console.log('=================================\nInitializing WARM models... DONE\n');
-          resolve(res);
-        })
-        .catch((err) => {
-          console.error('=================================\nInitializing WARM models... ERROR\n' + err);
-          reject(err);
-        });
+      resolve();
     });
   });
 
   var modelInitializers = [localInitializer, warmInitializer];
-  return Promise.all(modelInitializers);
+  return Promise.all(modelInitializers).then(() => {
+    return sequelize.sync(syncParameters)
+      .then(() => {
+        console.log('\n\t-> DONE Initializing models');
+      })
+      .catch((err) => {
+        console.error('\n\t-> ERROR Initializing models' + err);
+      });
+  });
 };
 
 module.exports = sequelize;

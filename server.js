@@ -6,18 +6,17 @@ var express = require("express"),
     passport = require("passport"),
     os = require('os'),
     //multer  = require('multer'),
-    warmDb = require('./controllers/warmDb'),
     sequelize = require('./initializers/db'),
     config = require('./config/environment'),
     cors = require('cors');
 
-//WARM Setup TODO enable
-//warmDb.init();
+console.log('\n# ERMES API server');
+console.log('\t* Booting up...');
 
 //Shows JSON pretty.
 app.set('json spaces', 3);
 
-// Tools to use in the APP
+// Enable JSON parse on request body
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 
@@ -29,15 +28,15 @@ app.use(multer({
     //}
 }));*/
 
-app.use(passport.initialize());
-
 // Initialize Passport
+app.use(passport.initialize());
 var initPassport = require('./passport/init');
 initPassport(passport);
 
 // Enable cross origin requests for the whole APP
 app.use(cors());
 
+console.log('\t* Connecting to the DB...');
 module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
     "use strict";
 
@@ -61,6 +60,7 @@ module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : f
 
     //Start to listen.
     return app.listen(config.http.PORT, function() {
+        console.log('\n** Server up! **\n');
         console.log('Express started on http://' + os.hostname() + ':' + config.http.PORT + '; Press Ctrl-C to terminate');
     });
 });
