@@ -1,5 +1,3 @@
-var sequelize = require('../initializers/db');
-
 module.exports = function(sequelize, Sequelize) {
   "use strict";
 

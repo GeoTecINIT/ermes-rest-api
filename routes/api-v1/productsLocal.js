@@ -7,9 +7,9 @@ var _ = require('underscore');
 _.mixin(require('underscore.inflections'));
 var sequelize = require('../../initializers/db');
 
-var Product = sequelize.import(path.resolve('./models/product'));
-var Parcel = sequelize.import(path.resolve('./models/parcel'));
-var User = sequelize.import(path.resolve('./models/user'));
+var Product = sequelize.import(path.resolve('./models/local/product'));
+var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
+var User = sequelize.import(path.resolve('./models/local/user'));
 
 const ommitedProductFields = ['createdAt', 'updatedAt', 'id', 'userId', 'type'];
 
@@ -31,7 +31,7 @@ module.exports = function() {
         var productType = _.singularize(req.params.productType);
         var parcelIds = _.map(req.body[productType].parcels, (parcel) => parcel.toLowerCase());
         var receivedProduct = _.omit(req.body[productType], ['parcels']);
-        var ProductType = sequelize.import(path.resolve('./models/' + _.singularize(req.params.productType)));
+        var ProductType = sequelize.import(path.resolve('./models/local/' + _.singularize(req.params.productType)));
 
         sequelize.transaction((t) => {
            var outterProductProperties = _.pick(receivedProduct, ['uploadDate', 'shared']);

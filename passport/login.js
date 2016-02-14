@@ -5,7 +5,7 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var bCrypt = require('bcrypt-nodejs');
 var sequelize = require('../initializers/db');
 
-var User = sequelize.import(path.resolve('./models/user'));
+var User = sequelize.import(path.resolve('./models/local/user'));
 
 
 module.exports = function(passport) {

@@ -1,4 +1,4 @@
-var sequelize = require('../initializers/db');
+var sequelize = require('../../initializers/db');
 
 var Parcel = sequelize.import('./parcel');
 var User = sequelize.import('./user');

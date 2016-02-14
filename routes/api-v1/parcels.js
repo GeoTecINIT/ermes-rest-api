@@ -5,9 +5,9 @@ var sequelize = require('../../initializers/db');
 var _ = require('underscore');
 var config = require('../../helpers/config');
 
-var Parcel = sequelize.import(path.resolve('./models/parcel'));
-var User = sequelize.import(path.resolve('./models/user'));
-var Product = sequelize.import(path.resolve('./models/product'));
+var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
+var User = sequelize.import(path.resolve('./models/local/user'));
+var Product = sequelize.import(path.resolve('./models/local/product'));
 
 const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'owners'];
 

@@ -1,4 +1,4 @@
-var sequelize = require('../initializers/db');
+var sequelize = require('../../initializers/db');
 
 var Product = sequelize.import('./product');
 

@@ -6,8 +6,8 @@ var path = require('path');
 var sequelize = require('../../initializers/db');
 
 
-var Parcel = sequelize.import(path.resolve('./models/parcel'));
-var User = sequelize.import(path.resolve('./models/user'));
+var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
+var User = sequelize.import(path.resolve('./models/local/user'));
 
 var administrators = require('../../user-config-files/administratorsInfo.json');
 var defaults = require('../../helpers/config');

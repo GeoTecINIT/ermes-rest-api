@@ -1,11 +1,11 @@
-var sequelize = require('../initializers/db');
+var sequelize = require('../../initializers/db');
 
 var Product = sequelize.import('./product');
 
 module.exports = function(sequelize, Sequelize) {
     "use strict";
 
-    var AbioticStress = sequelize.define('abioticStress', {
+    var AbioticStress = sequelize.define('abiotic_stress', {
         productId: {type: Sequelize.INTEGER, primaryKey: true},
         cause: {type: Sequelize.STRING, allowNull: false},
         observationDate: {type: Sequelize.DATE, allowNull: false}

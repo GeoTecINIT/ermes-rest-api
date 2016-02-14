@@ -36,5 +36,11 @@ module.exports = {
         "soilTypes",
         "weeds",
         "yields"
+    ],
+    allWARMProducts: [
+        {name: "biomasses", column: "actgroundBiomass"},
+        {name: "penicleBiomasses", column: "actOrgBiomass"},
+        {name: "abioticRisks", column: "coldSter"},
+        {name: "developmentStage", column: "stagecode"}
     ]
 };
