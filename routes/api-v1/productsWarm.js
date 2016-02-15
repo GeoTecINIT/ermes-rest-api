@@ -29,7 +29,7 @@ module.exports = function() {
                    if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                    } else {
-                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
+                        findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((warmProducts) => {
                             resolve(warmProducts);
                         });
                    }
@@ -43,7 +43,7 @@ module.exports = function() {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
-                            findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
+                            findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((warmProducts) => {
                                 resolve(warmProducts);
                             });
                         }
@@ -105,7 +105,7 @@ module.exports = function() {
                     if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                     } else {
-                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
+                        findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((predictions) => {
                             var product = [];
                             predictions.forEach((prediction) => {
                                 var plainPrediction = prediction.get({plain: true});
@@ -126,7 +126,7 @@ module.exports = function() {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
-                            findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
+                            findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((predictions) => {
                                 var product = [];
                                 predictions.forEach((prediction) => {
                                     var plainPrediction = prediction.get({plain: true});
@@ -141,7 +141,9 @@ module.exports = function() {
                 });
             }
         }).then((product) => {
-            res.status(200).json({productType: product});
+            var response = {};
+            response[productType] = product;
+            res.status(200).json(response);
         }).catch((ex) => {
             console.error('ERROR FETCHING WARM PRODUCT: ' + ex);
             res.status(200).json({errors: {name: [ex.name, ex.message]}});
@@ -150,6 +152,8 @@ module.exports = function() {
     });
 
     function findWARMProducts(region, parcelId, attributes, year, doy) {
+        doy = parseInt(doy);
+        year = parseInt(year);
         var WARM = sequelize.import(path.resolve('./models/warm/outWARM_' + region));
 
         return WARM.findAll({attributes: attributes,
