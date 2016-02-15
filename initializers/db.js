@@ -20,42 +20,44 @@ sequelize.initModels = function(syncParameters) {
   "use strict";
 
   // Initialize local models
-  var localInitializer =  new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     console.log('\t* Initializing local models...');
+
+    // Read and import local models from models dir
     fs.readdir('./models/local', (err, files) => {
 
       files.forEach((file) => {
         sequelize.import(path.resolve('./models/local/' + file));
       });
       resolve();
+
     });
-  });
+  }).then(() => {
+    console.log('\t-> DONE Initializing local models');
 
-  //return localInitializer;
+    return sequelize.sync(syncParameters).then(() => { // Initialize local models
 
-  var warmInitializer =  new Promise(function (resolve, reject) {
-    console.log('\t* Initializing WARM models...');
-    fs.readdir('./models/warm', (err, files) => {
+      return new Promise(function (resolve, reject) {
+        console.log('\t* Initializing WARM models...');
 
-      files.forEach((file) => {
-        if (!file) { // TODO Remove this
-          sequelize.import(path.resolve('./models/warm/' + file));
-        }
+        // Read and import WARM models from models dir
+        fs.readdir('./models/warm', (err, files) => {
+
+          files.forEach((file) => {
+            sequelize.import(path.resolve('./models/warm/' + file));
+          });
+          resolve();
+
+        });
+
+      }).then(() => {
+        console.log('\t-> DONE Initializing WARM models');
       });
-      resolve();
     });
+  }).catch((err) => {
+    console.error('\t-> ERROR Initializing models' + err);
   });
 
-  var modelInitializers = [localInitializer, warmInitializer];
-  return Promise.all(modelInitializers).then(() => {
-    return sequelize.sync(syncParameters)
-      .then(() => {
-        console.log('\n\t-> DONE Initializing models');
-      })
-      .catch((err) => {
-        console.error('\n\t-> ERROR Initializing models' + err);
-      });
-  });
 };
 
 module.exports = sequelize;

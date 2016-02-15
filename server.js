@@ -60,7 +60,7 @@ module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : f
 
     //Start to listen.
     return app.listen(config.http.PORT, function() {
-        console.log('\n** Server up! **\n');
+        console.log('** Server up! **\n');
         console.log('Express started on http://' + os.hostname() + ':' + config.http.PORT + '; Press Ctrl-C to terminate');
     });
 });

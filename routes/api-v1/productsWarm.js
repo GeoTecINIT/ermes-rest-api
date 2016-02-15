@@ -86,7 +86,7 @@ module.exports = function() {
         }
     });
 
-    router.get('/:productType/', function(req, res) {
+    router.get('/:productType', function(req, res) {
         var user = req.user;
         var parcelId = req.query.parcelId;
 

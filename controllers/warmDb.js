@@ -23,7 +23,7 @@ module.exports = {
             client.query(text, values, function (err, result) {
                 done();
                 cb(err, result);
-            })
-        })
+            });
+        });
     }
 };

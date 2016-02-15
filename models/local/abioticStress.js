@@ -8,6 +8,9 @@ module.exports = function(sequelize, Sequelize) {
     var AbioticStress = sequelize.define('abiotic_stress', {
         productId: {type: Sequelize.INTEGER, primaryKey: true},
         cause: {type: Sequelize.STRING, allowNull: false},
+        comments: Sequelize.TEXT, // Nullable
+        file: Sequelize.STRING, // Nullable
+        damage: Sequelize.INTEGER, // Nullable
         observationDate: {type: Sequelize.DATE, allowNull: false}
     });
 

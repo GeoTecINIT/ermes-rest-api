@@ -41,6 +41,6 @@ module.exports = {
         {name: "biomasses", column: "actgroundBiomass"},
         {name: "penicleBiomasses", column: "actOrgBiomass"},
         {name: "abioticRisks", column: "coldSter"},
-        {name: "developmentStage", column: "stagecode"}
+        {name: "developmentStages", column: "stagecode"}
     ]
 };
