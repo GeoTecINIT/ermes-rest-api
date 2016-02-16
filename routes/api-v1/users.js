@@ -17,12 +17,6 @@ const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 module.exports = function(passport)
 {
 
-    /*
-     ###############################################################
-     ############## USER POST is in /routes/api-v1.js ##############
-     ###############################################################
-     */
-
     // User creation, no auth is needed -> A.K.A Signup
     router.post('/', function (req, res) {
         sequelize.transaction((t) => {
@@ -40,13 +34,13 @@ module.exports = function(passport)
             }
 
             return User.create(req.body.user, {transaction: t}).then((user) => {
-                var owner;
+                var owner = req.body.user.collaboratesWith;
                 if (user.type === "owner") {
                     return user;
-                } else if (!(owner = req.body.user.collaboratesWith)) {
-                    throw new Error("An owner cannot collaborate");
+                } else if (!owner) {
+                    throw new Error("A collaborator needs an owner to collaborate with");
                 } else {
-                    return User.findOne({where: {username: { $like: owner.toLowerCase()}}},
+                    return User.findOne({where: {username: { $like: owner.toLowerCase().trim()}}},
                       {transaction: t}).then((owner) => {
                         if (owner) {
                             if (owner.type === 'owner') {
@@ -67,14 +61,14 @@ module.exports = function(passport)
             res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
         }).catch((ex) => {
             console.error('ERROR CREATING USER: ' + ex);
-            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
     router.get('/:username', passport.authenticate('basic', { session: false }), function(req, res){
         var user = req.user;
         if(user.username !== req.params.username.toLowerCase()){
-            res.status(403).json({errors: {name: ['Forbidden', 'You cannot access to this profile']}});
+            res.status(403).json({errors: [{type: 'Forbidden', message: 'You cannot access to this profile'}]});
         }
         else {
             var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
@@ -100,7 +94,7 @@ module.exports = function(passport)
                   res.status(200).json({'user': user});
               }).catch((ex) => {
                   console.error('ERROR FINDING USER: ' + ex);
-                  res.status(404).json({errors: {name: [ex.name, ex.message]}});
+                  res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
               });
           }
         }
@@ -124,7 +118,7 @@ module.exports = function(passport)
                 res.status(200).json(_.omit(user.get({plain: true}), userAttribsToOmit));
             }).catch((ex) => {
                 console.error('ERROR UPDATING USER: ' + ex);
-                res.status(200).json({errors: {name: [ex.name, ex.message]}});
+                res.status(200).json(({errors: [{type: ex.name, message: ex.message}]}));
             });
         }
 

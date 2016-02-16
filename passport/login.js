@@ -16,15 +16,15 @@ module.exports = function(passport) {
             User.findOne({where: {username: username}}).then((user) => {
                     //Username does not exists, log error and go back.
                     if (!user) {
-                        return done(null, false);
+                        return done(new Error("USER_NOT_FOUND"), false);
                     }
                     // User exists, password missmatch, log error and go back.
                     if (!isValidPassword(user, password)) {
-                        return done(null, false);
+                        return done(new Error("WRONG_PASSWORD"), false);
                     }
                     /*if(!user.activeAccount){
                         console.log("Account Not Actived: "+ username);
-                        return done(null, false);
+                        return done(new Error("INACTIVE_ACCOUNT"), false);
                     }*/
                     //All works fine.
                     return done(null, user);

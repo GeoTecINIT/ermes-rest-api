@@ -39,7 +39,7 @@ module.exports = function()
             res.status(201).json(response);
         }).catch((ex) => {
             console.error('ERROR CREATING PARCEL: ' + ex);
-            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
@@ -92,7 +92,7 @@ module.exports = function()
                 res.status(200).json(response);
             }).catch((ex) => {
                 console.error('PARCEL NOT FOUND: ' + parcelId);
-                res.status(404).json({errors: {name: [ex.name, ex.message]}});
+                res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
             });
 
     });
@@ -114,7 +114,7 @@ module.exports = function()
                 res.status(200).json(response);
             }).catch((ex) => {
                 console.error('PARCEL NOT FOUND: ' + parcelId);
-                res.status(404).json({errors: {name: [ex.name, ex.message]}});
+                res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
             });
         });
     });

@@ -69,7 +69,7 @@ module.exports = function() {
             res.status(200).json(response);
         }).catch((ex) => {
             console.error('ERROR FETCHING WARM PRODUCTS: ' + ex);
-            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
         });
 
     });
@@ -146,7 +146,7 @@ module.exports = function() {
             res.status(200).json(response);
         }).catch((ex) => {
             console.error('ERROR FETCHING WARM PRODUCT: ' + ex);
-            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
         });
 
     });

@@ -3,26 +3,28 @@ module.exports = function(sequelize, Sequelize) {
 
   var User = sequelize.define('user', {
     userId: {type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
+    name: {type: Sequelize.STRING},
+    surname: {type: Sequelize.STRING},
     username: {type: Sequelize.STRING, unique: true, allowNull: false,
       set: function(val) {
-        this.setDataValue('username', val.toLowerCase());
+        this.setDataValue('username', val.toLowerCase().trim());
       }
     },
     password: {type: Sequelize.STRING, allowNull: false},
     email: {type: Sequelize.STRING, allowNull: false, unique: true, validate: {isEmail: {msg: "FAKE_EMAIL"}}},
     region: {type: Sequelize.STRING(10), allowNull: false,
       set: function(val) {
-        this.setDataValue('region', val.toLowerCase());
+        this.setDataValue('region', (""+val).toLowerCase().trim());
       }
     },
     profile: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
-        this.setDataValue('profile', val.toLowerCase());
+        this.setDataValue('profile', (""+val).toLowerCase().trim());
       }
     },
     type: {type: Sequelize.STRING(30), allowNull: false,
       set: function(val) {
-        this.setDataValue('type', val.toLowerCase());
+        this.setDataValue('type', (""+val).toLowerCase().trim());
       }
     },
     language: {type: Sequelize.STRING(2), allowNull: false},

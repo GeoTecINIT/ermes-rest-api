@@ -6,9 +6,16 @@ const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 
 
 module.exports = function(passport){
-    router.post('/', passport.authenticate('basic', {session: false}), function(req, res) {
-            var user = _.omit(req.user.get({plain: true}), userAttribsToOmit);
-            res.status(200).json({user: user});
+
+    router.post('/', function(req, res) {
+      passport.authenticate('basic', function(err, user) {
+        if (!user) {
+          res.status(401).json(({errors: [{type: err.name, message: err.message}]}));
+        } else {
+          var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
+          res.status(200).json({user: plainUser});
+        }
+      })(req, res);
     });
 
     return router;

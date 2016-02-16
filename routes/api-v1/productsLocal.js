@@ -64,7 +64,7 @@ module.exports = function() {
             buildProduct(res, result, productType, 201);
         }).catch((ex) => {
             console.error('ERROR CREATING PRODUCT: ' + ex);
-            res.status(200).json({errors: {name: [ex.name, ex.message]}});
+            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
@@ -83,7 +83,7 @@ module.exports = function() {
         var productId = req.params.productId;
 
         if(!productId.match("^[0-9]+$")){
-            res.status(404).send({errors: {name: ['NOT FOUND']}});
+            res.status(404).send({errors: [{type: "NOT_FOUND", message: "Product not found"}]});
         }
         else{
             Product.findOne({where: {productId: productId}}).then((product) => {
@@ -94,7 +94,7 @@ module.exports = function() {
                 next();
             }).catch((ex) => {
                 console.error('PRODUCT NOT FOUND: ' + productId);
-                res.status(404).json({errors: {name: [ex.name, ex.message]}});
+                res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
             });
         }
 
@@ -134,7 +134,7 @@ module.exports = function() {
             buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
-            res.status(401).json({errors: {name: [ex.name, ex.message]}});
+            res.status(401).json({errors: [{type: ex.name, message: ex.message}]});
         });
 
     });
@@ -164,7 +164,7 @@ module.exports = function() {
             buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
-            res.status(403).json({errors: {name: [ex.name, ex.message]}});
+            res.status(403).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
@@ -201,7 +201,7 @@ module.exports = function() {
             buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
-            res.status(403).json({errors: {name: [ex.name, ex.message]}});
+            res.status(403).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
