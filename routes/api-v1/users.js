@@ -65,7 +65,7 @@ module.exports = function(passport)
         });
     });
 
-    router.get('/:username', passport.authenticate('basic', { session: false }), function(req, res){
+    router.get('/:username', passport.authenticate('login', { session: false }), function(req, res){
         var user = req.user;
         if(user.username !== req.params.username.toLowerCase()){
             res.status(403).json({errors: [{type: 'Forbidden', message: 'You cannot access to this profile'}]});
@@ -100,7 +100,7 @@ module.exports = function(passport)
         }
     });
 
-    router.put('/:username', passport.authenticate('basic', {session: false}), function(req, res){
+    router.put('/:username', passport.authenticate('login', {session: false}), function(req, res){
         var user = req.user;
         if(user.username !== req.params.username){
             res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
