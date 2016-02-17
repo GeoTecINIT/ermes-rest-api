@@ -10,7 +10,7 @@ module.exports = function(sequelize, Sequelize) {
     yield: {type:Sequelize.FLOAT, allowNull: false}, // Nullable
     comments: Sequelize.TEXT, // Nullable
     grainMoisture: Sequelize.FLOAT, // Nullable
-    harvestDate: {type: Sequelize.DATE, allowNull: false}
+    observationDate: {type: Sequelize.DATE, allowNull: false}
   });
 
   // Append general product info like: upload date, user who uploaded, parcels where applied, etc.
