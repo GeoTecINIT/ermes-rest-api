@@ -16,7 +16,7 @@ module.exports = function()
 
     router.post('/', function(req, res) {
         if (req.body.parcel && req.body.parcel.parcelId) {
-            req.body.parcel.parcelId = req.body.parcel.parcelId.toLowerCase();
+            req.body.parcel.parcelId = req.body.parcel.parcelId.toUpperCase();
         }
         sequelize.transaction((t) => {
             return Parcel.findOrCreate({where: {parcelId: req.body.parcel.parcelId}, defaults: req.body.parcel, transaction: t})
@@ -25,13 +25,8 @@ module.exports = function()
                 if (req.user.type !== 'owner') {
                     throw new Error("You have to be an owner to manage parcels");
                 } else {
-                    return parcel.hasOwner(user, {transaction: t}).then((has) => {
-                        if (has) {
-                            throw new Error('You already own that parcel');
-                        }
-                        return parcel.addOwner(user, {transaction: t}).then(() => {
-                            return getFullParcelResponse(user, parcel, {transaction: t});
-                        });
+                    return parcel.addOwner(user, {transaction: t}).then(() => {
+                        return getFullParcelResponse(user, parcel, {transaction: t});
                     });
                 }
             });
@@ -52,7 +47,7 @@ module.exports = function()
      *            - -1 = findAll
      */
     router.get('/:parcelId', function(req, res){
-        var parcelId = req.params.parcelId.toLowerCase();
+        var parcelId = req.params.parcelId.toUpperCase();
         var limit = req.query.limit || 1;
         var user = req.user;
 
@@ -97,8 +92,33 @@ module.exports = function()
 
     });
 
+    router.put('/:parcelId', function(req, res) {
+        var parcelId = req.params.parcelId.toUpperCase();
+        var parcel = req.body.parcel;
+        var user = req.user;
+
+        var attributesToUpdate = _.pick(parcel, ['inDanger']);
+
+        sequelize.transaction((t) => {
+            return user.getParcels({transaction: t}).then((parcels) => {
+                var parcel = _.find(parcels, (parcel) => parcel.parcelId === parcelId);
+                if (!parcel) {
+                    throw new Error("Parcel not found or you do not own it");
+                }
+                return parcel.update(attributesToUpdate, {transaction: t}).then(() => {
+                    return getFullParcelResponse(user, parcel, {transaction: t});
+                });
+            }).then((response) => {
+                res.status(200).json(response);
+            }).catch((ex) => {
+                console.error('PARCEL NOT FOUND: ' + parcelId);
+                res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
+            });
+        });
+    });
+
     router.delete('/:parcelId', function(req, res) {
-        var parcelId = req.params.parcelId.toLowerCase();
+        var parcelId = req.params.parcelId.toUpperCase();
         var user = req.user;
 
         sequelize.transaction((t) => {

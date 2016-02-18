@@ -43,12 +43,14 @@ module.exports = function(passport)
                     return User.findOne({where: {username: { $like: owner.toLowerCase().trim()}}},
                       {transaction: t}).then((owner) => {
                         if (owner) {
-                            if (owner.type === 'owner') {
+                            if (owner.type !== 'owner') {
+                                throw new Error('Owner specified is not valid');
+                            } else if (owner.region !== user.region) {
+                                throw new Error('Region has to be the same');
+                            } else  {
                                 return user.setOwners([owner], {transaction: t}).then(() => {
                                     return user;
                                 });
-                            } else  {
-                                throw new Error('Owner specified is not valid');
                             }
                         } else {
                             throw new Error('Owner does not exist');
@@ -103,23 +105,31 @@ module.exports = function(passport)
     router.put('/:username', passport.authenticate('login', {session: false}), function(req, res){
         var user = req.user;
         if(user.username !== req.params.username){
-            res.status(403).json({err: true, content: {name: "Forbidden", msg: 'You cannot access to this profile'}});
+            res.status(403).json({err: true, content: {name: 'Forbidden', msg: 'You cannot access to this profile'}});
         }
         else {
             var attributesToChange = _.pick(req.body.user,
-              ['password', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
+              ['password', 'oldPassword', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
             );
 
-            if (attributesToChange.password) {
-                attributesToChange.password = createHash(attributesToChange.password);
-            }
+            sequelize.transaction((t) => {
+                if (attributesToChange.password) {
+                    if (attributesToChange.oldPassword) {
+                        if (!bCrypt.compareSync(attributesToChange.oldPassword, user.password)) {
+                            throw new Error('PASSWORD_MISMATCH');
+                        }
+                        attributesToChange.password = createHash(attributesToChange.password);
+                    }
+                }
 
-            user.update(attributesToChange).then(() => {
-                res.status(200).json(_.omit(user.get({plain: true}), userAttribsToOmit));
+                return user.update(attributesToChange, {transaction: t});
+            }).then(() => {
+                res.status(200).json({user: _.omit(user.get({plain: true}), userAttribsToOmit)});
             }).catch((ex) => {
                 console.error('ERROR UPDATING USER: ' + ex);
                 res.status(200).json(({errors: [{type: ex.name, message: ex.message}]}));
             });
+
         }
 
     });

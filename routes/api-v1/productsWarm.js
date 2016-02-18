@@ -14,7 +14,7 @@ module.exports = function() {
 
     router.get('/', function(req, res) {
         var user = req.user;
-        var parcelId = req.query.parcelId;
+        var parcelId = req.query.parcelId.toUpperCase();
 
         var doy = req.query.doy;
         var year = req.query.year;
@@ -29,7 +29,7 @@ module.exports = function() {
                    if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                    } else {
-                        findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((warmProducts) => {
+                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
                             resolve(warmProducts);
                         });
                    }
@@ -38,12 +38,12 @@ module.exports = function() {
                 user.getOwners().then((owners) => {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
-                    Parcel.findAll({where: {parcelId: parcelId}, // TODO check if this works
+                    Parcel.findAll({where: {parcelId: parcelId},
                         includes: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
-                            findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((warmProducts) => {
+                            findWARMProducts(user.region, parcelId, attributes, year, doy).then((warmProducts) => {
                                 resolve(warmProducts);
                             });
                         }
@@ -88,7 +88,7 @@ module.exports = function() {
 
     router.get('/:productType', function(req, res) {
         var user = req.user;
-        var parcelId = req.query.parcelId;
+        var parcelId = req.query.parcelId.toUpperCase();
 
         var doy = req.query.doy;
         var year = req.query.year;
@@ -105,7 +105,7 @@ module.exports = function() {
                     if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                     } else {
-                        findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((predictions) => {
+                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
                             var product = [];
                             predictions.forEach((prediction) => {
                                 var plainPrediction = prediction.get({plain: true});
