@@ -119,6 +119,8 @@ module.exports = function(passport)
                             throw new Error('PASSWORD_MISMATCH');
                         }
                         attributesToChange.password = createHash(attributesToChange.password);
+                    } else {
+                        attributesToChange = _.omit(attributesToChange, ['password']);
                     }
                 }
 
