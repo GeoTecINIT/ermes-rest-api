@@ -29,7 +29,7 @@ module.exports = function() {
     router.post('/:productType', function(req, res) {
         var user = req.user;
         var productType = _.singularize(req.params.productType);
-        var parcelIds = _.map(req.body[productType].parcels, (parcel) => parcel.toLowerCase());
+        var parcelIds = _.map(req.body[productType].parcels, (parcel) => parcel.toUpperCase());
         var receivedProduct = _.omit(req.body[productType], ['parcels']);
         var ProductType = sequelize.import(path.resolve('./models/local/' + _.singularize(req.params.productType)));
 
