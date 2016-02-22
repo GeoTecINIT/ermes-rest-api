@@ -17,7 +17,10 @@ module.exports = function() {
 
     // Check if we are offering the product that the client is looking for
     router.use('/:productType', function(req, res, next) {
-        if (_.contains(defaults.allLocalProducts, req.params.productType)) {
+        var productType = req.params.productType;
+        if (productType === 'observations' || // All allowed to access observations
+            req.user.type !== 'guest' && _.contains(defaults.allLocalProducts, productType)) { // Guest access denied
+
             next();
         } else {
             res.type('text/plain');
@@ -49,7 +52,7 @@ module.exports = function() {
                       return checkAndAddProductToParcel(parcelIds, usersIds, product, t).then(() => {
                           return [product, innerProduct];
                       });
-                  } else {
+                  } else if (user.type === 'collaborator') {
                       return user.getOwners({transaction: t}).then((owners) => {
                           var usersIds = _.map(owners, (owner) => owner.userId);
 
@@ -57,6 +60,8 @@ module.exports = function() {
                               return [product, innerProduct];
                           });
                       });
+                  } else { // Future admin or guest things, add here
+                      throw new Error('Account error');
                   }
                });
            });
@@ -117,7 +122,7 @@ module.exports = function() {
                         });
                     }
                 });
-            } else {
+            } else if (user.type === 'collaborator') {
                 user.getOwners().then((owners) => {
                     var userIds = _.map(owners, (owner) => owner.userId);
                     userIds.push(user.userId);
@@ -129,6 +134,8 @@ module.exports = function() {
                         });
                     }
                 });
+            } else { // Add here guest or admin handlers
+                throw new Error('Account error');
             }
         }).then((result) => {
             buildProduct(res, result, product.type, 200);
@@ -148,18 +155,30 @@ module.exports = function() {
         var updateSpecific = _.omit(req.body[product.type], ['productId', 'createdAt', 'updatedAt']);
 
         sequelize.transaction((t) => {
-            if (user.userId !== product.userId) {
-                throw new Error('You do not have permission to manage this product');
-            } else {
-                return product.getInnerProduct({transaction: t}).then((innerProduct) => {
-                    return product.update(updateGeneral, {transaction: t}).then(() => {
-                        return innerProduct.update(updateSpecific, {transaction: t}).then(() => {
-                            return [product, innerProduct];
+            return new Promise((resolve, reject) => {
+                var allowedUsers = [user.username];
+                if (user.type === 'collaborator') {
+                    return user.getOwners({transaction: t}).then((owners) => {
+                       var ownerIds = _.map(owners, (owner) => owner.username);
+                       return resolve(allowedUsers.concat(ownerIds));
+                    }).catch((err) => reject(err));
+                } else {
+                    return resolve(allowedUsers);
+                }
+            }).then((allowedUsers) => {
+                if (!_.contains(allowedUsers, product.userId)) { // Add admin permission here
+                    throw new Error('You do not have permission to manage this product');
+                } else {
+                    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
+                        return product.update(updateGeneral, {transaction: t}).then(() => {
+                            return innerProduct.update(updateSpecific, {transaction: t}).then(() => {
+                                return [product, innerProduct];
+                            });
                         });
-                    });
 
-                });
-            }
+                    });
+                }
+            });
         }).then((result) => {
             buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
@@ -173,30 +192,42 @@ module.exports = function() {
         var product = req.product;
 
         sequelize.transaction((t) => {
-           if (user.userId !== product.userId) {
-               throw new Error('You do not have permission to manage this product');
-           } else {
-               return product.getInnerProduct({transaction: t}).then((innerProduct) => {
-                   var productPlain = product.get({plain: true});
-                   var innerProductPlain = innerProduct.get({plain: true});
+            return new Promise((resolve, reject) => {
+                var allowedUsers = [user.username];
+                if (user.type === 'collaborator') {
+                    return user.getOwners({transaction: t}).then((owners) => {
+                        var ownerIds = _.map(owners, (owner) => owner.username);
+                        return resolve(allowedUsers.concat(ownerIds));
+                    }).catch((err) => reject(err));
+                } else {
+                    return resolve(allowedUsers);
+                }
+            }).then((allowedUsers) => {
+                if (!_.contains(allowedUsers, product.userId)) { // Add admin permission here
+                    throw new Error('You do not have permission to manage this product');
+                } else {
+                    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
+                        var productPlain = product.get({plain: true});
+                        var innerProductPlain = innerProduct.get({plain: true});
 
-                   // Combine both general and specific product
-                   _.extend(productPlain, innerProductPlain);
-                   productPlain = _.omit(productPlain, ommitedProductFields);
+                        // Combine both general and specific product
+                        _.extend(productPlain, innerProductPlain);
+                        productPlain = _.omit(productPlain, ommitedProductFields);
 
-                   // Mixed response
-                   var response = {};
-                   response[product.type] = productPlain;
+                        // Mixed response
+                        var response = {};
+                        response[product.type] = productPlain;
 
-                   // Remove from the system
+                        // Remove from the system
 
-                   return innerProduct.destroy({transaction: t}).then(() => {
-                       return product.destroy({transaction: t}).then(() => {
-                           return [product, innerProduct];
-                       });
-                   });
-               });
-           }
+                        return innerProduct.destroy({transaction: t}).then(() => {
+                            return product.destroy({transaction: t}).then(() => {
+                                return [product, innerProduct];
+                            });
+                        });
+                    });
+                }
+            });
         }).then((result) => {
             buildProduct(res, result, product.type, 200);
         }).catch((ex) => {
@@ -220,5 +251,4 @@ module.exports = function() {
     }
 
     return router;
-
 };
