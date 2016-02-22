@@ -34,14 +34,14 @@ module.exports = function(passport)
             }
 
             return User.create(req.body.user, {transaction: t}).then((user) => {
-                var owner = req.body.user.collaboratesWith.toLowerCase().trim();
+                var owner = req.body.user.collaboratesWith;
                 if (user.type === "owner" || user.type === "admin") {
                     return user;
                 } else if (user.type !== "collaborator") {
                     throw new Error("Invalid user type");
                 } else if (!owner) {
                     throw new Error("A collaborator needs an owner to collaborate with");
-                } else if (owner === user.username) {
+                } else if ((owner = owner.toLowerCase().trim()) === user.username) {
                     throw new Error("You cannot collaborate with yourself");
                 } else {
                     return User.findOne({where: {username: { $like: owner}}},
@@ -71,8 +71,13 @@ module.exports = function(passport)
         });
     });
 
+    /**
+     * @URLParam username user from whom we want to retrieve the profile
+     * @QueryParam withParcels true value adds also metadata from the user parcels with its danger status
+     */
     router.get('/:username', passport.authenticate('login', { session: false }), function(req, res){
         var user = req.user;
+        var withParcels = req.query.withParcels;
         if(user.username !== req.params.username.toLowerCase()){
             res.status(403).json({errors: [{type: 'Forbidden', message: 'You cannot access to this profile'}]});
         }
@@ -80,28 +85,44 @@ module.exports = function(passport)
             var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
             if (user.type === 'owner') {
               user.getParcels().then((parcels) => {
-                    plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
-                    res.status(200).json({user: plainUser});
+                  plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
+                  var response = {user: plainUser};
+                  if (withParcels === 'true') {
+                      var responseParcels = [];
+                      parcels.forEach((parcel) => {
+                          responseParcels.push(_.pick(parcel, ['parcelId', 'inDanger']));
+                      });
+                      response.parcels = responseParcels;
+                  }
+                  res.status(200).json(response);
               });
             } else if (user.type === 'collaborator') {
-              sequelize.transaction((t) => {
-                 return user.getOwners({transaction: t}).then((owners) => {
+                 return user.getOwners().then((owners) => {
                      var ownerIds = _.map(owners, (owner) => owner.userId);
-                     return Parcel.findAll({include: [{
-                         model: User,
-                         as: 'owners',
-                         where: {userId: {$in: ownerIds}}
-                     }], transaction : t}).then((parcels) => {
+                     return Parcel.findAll({include: [
+                         {
+                             model: User,
+                             as: 'owners',
+                             where: {userId: {$in: ownerIds}}
+                         }
+                     ]}).then((parcels) => {
                          plainUser.parcels =  _.map(parcels, (parcel) => parcel.parcelId);
-                         return plainUser;
+                         var response = {user: plainUser};
+                         if (withParcels === 'true') {
+                             var responseParcels = [];
+                             parcels.forEach((parcel) => {
+                                 responseParcels.push(_.pick(parcel, ['parcelId', 'inDanger']));
+                             });
+                             response.parcels = responseParcels;
+                         }
+                         return response;
                      });
+                 }).then((response) => {
+                      res.status(200).json(response);
+                 }).catch((ex) => {
+                      console.error('ERROR FINDING USER: ' + ex);
+                      res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
                  });
-              }).then((user) => {
-                  res.status(200).json({'user': user});
-              }).catch((ex) => {
-                  console.error('ERROR FINDING USER: ' + ex);
-                  res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
-              });
             } else { // Guest by default
                 res.status(200).json({user: plainUser});
             }

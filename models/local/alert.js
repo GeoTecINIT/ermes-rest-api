@@ -11,6 +11,7 @@ module.exports = function(sequelize, Sequelize) {
 
   // A parcel can have many alerts
   Parcel.hasMany(Alert, {as: 'alerts', foreignKey: 'parcelId'});
+  Alert.belongsTo(Parcel, {as: 'parcel', foreignKey: 'parcelId'});
 
   return Alert;
 };
