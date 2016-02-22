@@ -34,7 +34,7 @@ module.exports = function() {
                         });
                    }
                 });
-            } else { // Collaborator
+            } else if (user.type === 'collaborator'){
                 user.getOwners().then((owners) => {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
@@ -49,6 +49,8 @@ module.exports = function() {
                         }
                     });
                 });
+            } else { // Guest not allowed to see WARM, admin access goes here later
+                throw new Error("Account error");
             }
         }).then((products) => {
             var response = {};
@@ -77,7 +79,8 @@ module.exports = function() {
     // Check if we are offering the product that the client is looking for
     router.use('/:productType', function(req, res, next) {
         var warmNames = _.map(defaults.allWARMProducts, (product) => product.name);
-        if (_.contains(warmNames, req.params.productType)) {
+        // Guest not allowed to list WARM products
+        if (req.user.type !== 'guest' && _.contains(warmNames, req.params.productType)) {
             next();
         } else {
             res.type('text/plain');
@@ -117,7 +120,7 @@ module.exports = function() {
                         });
                     }
                 });
-            } else { // Collaborator
+            } else if (user.type === 'collaborator'){ // Collaborator
                 user.getOwners().then((owners) => {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
@@ -139,6 +142,8 @@ module.exports = function() {
                         }
                     });
                 });
+            } else { // Admin goes here
+                throw new Error("Account error");
             }
         }).then((product) => {
             var response = {};

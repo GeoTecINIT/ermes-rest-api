@@ -82,7 +82,9 @@ module.exports = function()
                             }
                         });
                     });
-                } // Guest not allowed, put here Admin or change to Strategy pattern
+                } else { // Guest not allowed, put here Admin or change to Strategy pattern
+                    throw new Error("Account error");
+                }
             }).then((response) => {
                 res.status(200).json(response);
             }).catch((ex) => {
