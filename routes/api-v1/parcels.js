@@ -22,7 +22,7 @@ module.exports = function()
             return Parcel.findOrCreate({where: {parcelId: req.body.parcel.parcelId}, defaults: req.body.parcel, transaction: t})
               .spread((parcel) => {
                 var user = req.user;
-                if (req.user.type !== 'owner') {
+                if (req.user.type !== 'owner') { // Only allowed to owners
                     throw new Error("You have to be an owner to manage parcels");
                 } else {
                     return parcel.addOwner(user, {transaction: t}).then(() => {
@@ -61,7 +61,7 @@ module.exports = function()
                             resolve(getFullParcelResponse(user, parcel, {limit: limit}));
                         }
                     });
-                } else {
+                } else if (user.type === 'collaborator') {
                     user.getOwners().then((owners) => {
                         var ownerIds = _.map(owners, (owner) => owner.userId);
                         Parcel.findOne({
@@ -82,7 +82,7 @@ module.exports = function()
                             }
                         });
                     });
-                }
+                } // Guest not allowed, put here Admin or change to Strategy pattern
             }).then((response) => {
                 res.status(200).json(response);
             }).catch((ex) => {
