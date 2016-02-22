@@ -34,13 +34,17 @@ module.exports = function(passport)
             }
 
             return User.create(req.body.user, {transaction: t}).then((user) => {
-                var owner = req.body.user.collaboratesWith;
-                if (user.type === "owner") {
+                var owner = req.body.user.collaboratesWith.toLowerCase().trim();
+                if (user.type === "owner" || user.type === "admin") {
                     return user;
+                } else if (user.type !== "collaborator") {
+                    throw new Error("Invalid user type");
                 } else if (!owner) {
                     throw new Error("A collaborator needs an owner to collaborate with");
+                } else if (owner === user.username) {
+                    throw new Error("You cannot collaborate with yourself");
                 } else {
-                    return User.findOne({where: {username: { $like: owner.toLowerCase().trim()}}},
+                    return User.findOne({where: {username: { $like: owner}}},
                       {transaction: t}).then((owner) => {
                         if (owner) {
                             if (owner.type !== 'owner') {
@@ -77,9 +81,9 @@ module.exports = function(passport)
             if (user.type === 'owner') {
               user.getParcels().then((parcels) => {
                     plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
-                    res.status(200).json({'user': plainUser});
+                    res.status(200).json({user: plainUser});
               });
-          } else {
+            } else if (user.type === 'collaborator') {
               sequelize.transaction((t) => {
                  return user.getOwners({transaction: t}).then((owners) => {
                      var ownerIds = _.map(owners, (owner) => owner.userId);
@@ -98,7 +102,9 @@ module.exports = function(passport)
                   console.error('ERROR FINDING USER: ' + ex);
                   res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
               });
-          }
+            } else { // Guest by default
+                res.status(200).json({user: plainUser});
+            }
         }
     });
 
