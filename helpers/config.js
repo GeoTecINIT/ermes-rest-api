@@ -37,6 +37,12 @@ module.exports = {
         "weeds",
         "yields"
     ],
+    customOptionProducts: [
+        "cropInfos",
+        "insects",
+        "diseases",
+        "weeds"
+    ],
     allWARMProducts: [
         {name: "biomasses", column: "actgroundBiomass"},
         {name: "penicleBiomasses", column: "actOrgBiomass"},

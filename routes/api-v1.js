@@ -16,6 +16,9 @@ module.exports = function(passport) {
     var warm = require('./api-v1/productsWarm');
     router.use('/warm', passport.authenticate('login', {session: false}), warm());
 
+    var customOptions = require('./api-v1/customOptions');
+    router.use('/customOptions', passport.authenticate('login', {session: false}), customOptions());
+
     // TODO handle routing to product image files
     //var uploads = require("./api-v1/uploads")();
     //router.use("/uploads", passport.authenticate('login', {session: false}), uploads);
