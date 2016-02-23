@@ -34,3 +34,6 @@ node_modules
 
 #WebStorm Config
 .idea
+
+#Sensible files
+config/environment.js
