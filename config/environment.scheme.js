@@ -1,3 +1,5 @@
+// Copy and rename to environment.js on this same folder
+
 var environment = {
   http: {
     PORT: process.env.PORT || 3000, // With environment variable or with default port
