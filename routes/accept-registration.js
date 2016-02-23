@@ -6,30 +6,36 @@ var loggers = require('../initializers/loggers');
 
 var sequelize = require('../initializers/db');
 var User = sequelize.import(path.resolve('./models/local/user'));
-
+var ActivationToken = sequelize.import(path.resolve('./models/local/activationToken'));
 
 module.exports = function()
 {
 
     router.get('/', function(req, res, next){
         var userId = req.query.userId;
-        var accepted = (req.query.accepted === "true");
+        var token = req.query.token;
 
         sequelize.transaction((t) => {
-            return User.findOne({where: {userId: userId}, transaction: t}).then((user) => {
-                if(!accepted){
-                    sendMail(user);
-                }
-                else if (!user) {
-                    throw new Error("User not found");
-                } else if(user.active){
-                    res.status(200).json({error: false, msg: "User already Accepted."});
-                }
-                else{
-                    return user.update({active: true}, {transaction: t}).then(() => {
-                        sendMail(user);
-                        res.status(200).json({error: false, msg: "User accepted."});
+            return ActivationToken.findOne({where: {userId: userId}, transaction: t}).then((activation) => {
+                if (activation) {
+                    return activation.getUser({transaction: t}).then((user) => {
+                        if(user.active){
+                            res.status(200).json({error: false, msg: "User already Accepted."});
+                        } else if(token === activation.reject){
+                            sendMail(user);
+                            return activation.destroy({transaction: t});
+                        } else if(token === activation.accept) {
+                            return user.update({active: true}, {transaction: t}).then(() => {
+                                sendMail(user);
+                                res.status(200).json({error: false, msg: "User accepted."});
+                                return activation.destroy({transaction: t});
+                            });
+                        } else {
+                            throw new Error("Unauthorized");
+                        }
                     });
+                } else {
+                    throw new Error("Unauthorized");
                 }
             });
         }).catch((ex) => {

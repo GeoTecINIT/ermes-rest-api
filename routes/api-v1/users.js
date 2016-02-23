@@ -8,6 +8,7 @@ var sequelize = require('../../initializers/db');
 
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
+var ActivationToken = sequelize.import(path.resolve('./models/local/activationToken'));
 
 var administrators = require('../../user-config-files/administratorsInfo.json');
 var defaults = require('../../helpers/config');
@@ -38,8 +39,7 @@ module.exports = function(passport)
             return User.create(req.body.user, {transaction: t}).then((user) => {
                 var owner = req.body.user.collaboratesWith;
                 if (user.type === "owner" || user.type === "admin") {
-                    sendMail(administrators, user, "is trying to register");
-                    return user;
+                    return {user: user};
                 } else if (user.type !== "collaborator") {
                     throw new Error("Invalid user type");
                 } else if (!owner) {
@@ -56,8 +56,7 @@ module.exports = function(passport)
                                 throw new Error('Region has to be the same');
                             } else  {
                                 return user.setOwners([owner], {transaction: t}).then(() => {
-                                    sendMail([owner.email], user, "wants to collaborate with you");
-                                    return user;
+                                    return {user: user, owner: owner};
                                 });
                             }
                         } else {
@@ -66,8 +65,15 @@ module.exports = function(passport)
                     });
                 }
             });
-        }).then((user) => {
-            //sendMail(administrators, res, user);
+        }).then((data) => {
+            var user = data.user;
+
+            if (data.owner) {
+                var owner = data.owner;
+                sendMail([owner.email], user, "wants to collaborate with you");
+            } else {
+                sendMail(administrators, user, "is trying to register");
+            }
             res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
         }).catch((ex) => {
             console.error('ERROR CREATING USER: ' + ex);
@@ -193,40 +199,43 @@ function calculateLanguage(region){
 // Send a confirmation email
 function sendMail(emails, user, extraInfo){
     console.log(emails);
-    var to = emails;
-    var subject = "New ERMES Registration [user: " + user.username + "]";
-    var message = "User " + user.username + " " + extraInfo + ". ACCEPT OR DECLINE (" + user.email + ")";
 
-    var urlAccept = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&accepted=true";
-    var urlDecline = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&accepted=false";
+    ActivationToken.create({userId: user.userId}).then((token) => {
+        var to = emails;
+        var subject = "New ERMES Registration [user: " + user.username + "]";
+        var message = "User " + user.username + " " + extraInfo + ". ACCEPT OR DECLINE (" + user.email + ")";
 
-    var htmlText = "<p>" + message + "</p>";
+        var urlAccept = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.accept;
+        var urlDecline = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.reject;
 
-    var buttonAccept = "<p><a href=" + urlAccept + ">ACCEPT USER</a></p>";
-    var buttonDecline = "<p><a href=" + urlDecline + ">DECLINE USER</a></p>";
+        var htmlText = "<p>" + message + "</p>";
 
-    var htmlContent =  "<br>" + htmlText + "<br>" + buttonAccept + "<br>" + buttonDecline;
+        var buttonAccept = "<p><a href=" + urlAccept + ">ACCEPT USER</a></p>";
+        var buttonDecline = "<p><a href=" + urlDecline + ">DECLINE USER</a></p>";
 
-    var nodemailer = require("nodemailer");
+        var htmlContent =  "<br>" + htmlText + "<br>" + buttonAccept + "<br>" + buttonDecline;
 
-    var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
+        var nodemailer = require("nodemailer");
 
-    var mailOptions = {
-        from: 'ERMES <ermesmailer@gmail.com>', // sender address
-        to: to,
-        subject: subject,
-        html: htmlContent,
-        text: message
-    };
+        var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
 
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.error('[EMAIL]: '+ JSON.stringify(error));
-            loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
-        } else {
-            console.log('[EMAIL]: '+ JSON.stringify(info));
-            loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
-        }
+        var mailOptions = {
+            from: 'ERMES <ermesmailer@gmail.com>', // sender address
+            to: to,
+            subject: subject,
+            html: htmlContent,
+            text: message
+        };
+
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                console.error('[EMAIL]: '+ JSON.stringify(error));
+                loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
+            } else {
+                console.log('[EMAIL]: '+ JSON.stringify(info));
+                loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
+            }
+        });
     });
 
 }
