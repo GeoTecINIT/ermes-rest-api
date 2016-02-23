@@ -11,6 +11,8 @@ var User = sequelize.import(path.resolve('./models/local/user'));
 
 var administrators = require('../../user-config-files/administratorsInfo.json');
 var defaults = require('../../helpers/config');
+var config = require('../../config/environment');
+var loggers = require('../../initializers/loggers');
 
 const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 
@@ -36,6 +38,7 @@ module.exports = function(passport)
             return User.create(req.body.user, {transaction: t}).then((user) => {
                 var owner = req.body.user.collaboratesWith;
                 if (user.type === "owner" || user.type === "admin") {
+                    sendMail(administrators, user, "is trying to register");
                     return user;
                 } else if (user.type !== "collaborator") {
                     throw new Error("Invalid user type");
@@ -47,12 +50,13 @@ module.exports = function(passport)
                     return User.findOne({where: {username: { $like: owner}}},
                       {transaction: t}).then((owner) => {
                         if (owner) {
-                            if (owner.type !== 'owner') {
+                            if (owner.type !== 'owner' || !owner.active) {
                                 throw new Error('Owner specified is not valid');
                             } else if (owner.region !== user.region) {
                                 throw new Error('Region has to be the same');
                             } else  {
                                 return user.setOwners([owner], {transaction: t}).then(() => {
+                                    sendMail([owner.email], user, "wants to collaborate with you");
                                     return user;
                                 });
                             }
@@ -187,14 +191,14 @@ function calculateLanguage(region){
 }
 
 // Send a confirmation email
-function sendMail(emails, res, user){
+function sendMail(emails, user, extraInfo){
     console.log(emails);
     var to = emails;
     var subject = "New ERMES Registration";
-    var message = "User " + user.username + " is trying to register. ACCEPT OR DECLINE (" + user.email + ")";
+    var message = "User " + user.username + " " + extraInfo + ". ACCEPT OR DECLINE (" + user.email + ")";
 
-    var urlAccept = "http://ermes.dlsi.uji.es:6686/accept-registration?username=" + user.username + "&email=" + user.email + "&accepted=true";
-    var urlDecline = "http://ermes.dlsi.uji.es:6686/accept-registration?username=" + user.username + "&email=" + user.email + "&accepted=false";
+    var urlAccept = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&accepted=true";
+    var urlDecline = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&accepted=false";
 
     var htmlText = "<p>" + message + "</p>";
 
@@ -217,10 +221,12 @@ function sendMail(emails, res, user){
 
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
-            console.log(error);
-            return res.jsonp({"error": "Problem sending confirmation mail."});
+            console.error('[EMAIL]: '+ JSON.stringify(error));
+            loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
+        } else {
+            console.log('[EMAIL]: '+ JSON.stringify(info));
+            loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
         }
-        res.status(201).send(user.username);
     });
 
 }

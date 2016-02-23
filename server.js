@@ -6,6 +6,7 @@ var express = require("express"),
     passport = require("passport"),
     os = require('os'),
     //multer  = require('multer'),
+    loggers = require('./initializers/loggers'),
     sequelize = require('./initializers/db'),
     config = require('./config/environment'),
     cors = require('cors');
@@ -56,6 +57,7 @@ module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : f
         console.error(err.stack);
         res.type('text/plain');
         res.status(500).send('500 - Internal server error');
+        loggers.error.write('[' + new Date() + ' SERVER ERROR]: ' + JSON.stringify(err) + '\n');
     });
 
     //Start to listen.

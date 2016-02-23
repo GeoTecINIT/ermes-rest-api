@@ -5,6 +5,7 @@ var config = require('../config/environment');
 
 var sequelize = new Sequelize(config.SQL.db, config.SQL.auth.user, config.SQL.auth.pass, {
   host: config.SQL.host,
+  port: config.SQL.port,
   dialect: 'postgres',
 
   pool: {

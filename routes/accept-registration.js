@@ -1,44 +1,40 @@
-"use strict";
+var path = require('path');
 var express = require('express');
 var router = express.Router();
-var mongoose = require("mongoose");
-var User = mongoose.model("User");
 
+var loggers = require('../initializers/loggers');
+
+var sequelize = require('../initializers/db');
+var User = sequelize.import(path.resolve('./models/local/user'));
 
 
 module.exports = function()
 {
 
     router.get('/', function(req, res, next){
-        var username = req.query.username;
-        var email = req.query.email;
+        var userId = req.query.userId;
         var accepted = (req.query.accepted === "true");
 
-        if(!accepted){
-            sendMail(email, res, username, false);
-        }
-        else{
-            User.findOne({'username': username}, function (err, user) {
-                if (err) {
-                    res.status(500).send(err.message);
+        sequelize.transaction((t) => {
+            return User.findOne({where: {userId: userId}, transaction: t}).then((user) => {
+                if(!accepted){
+                    sendMail(user);
                 }
                 else if (!user) {
-                    res.status(401).send("User not found.");
+                    throw new Error("User not found");
+                } else if(user.active){
+                    res.status(200).json({error: false, msg: "User already Accepted."});
                 }
-                else if (user) {
-                    if(user.activeAccount){
-                        res.status(401).send("User already Accepted.");
-                    }
-                    else{
-                        user.activeAccount = true;
-                        user.save();
-                        sendMail(email, res, username, true);
-                    }
+                else{
+                    return user.update({active: true}, {transaction: t}).then(() => {
+                        sendMail(user);
+                        res.status(200).json({error: false, msg: "User accepted."});
+                    });
                 }
             });
-        }
-
-
+        }).catch((ex) => {
+            res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
+        });
     });
 
     //router.use(function(req, res, next){
@@ -81,16 +77,22 @@ module.exports = function()
     //    }
     //});
     return router;
-}
+};
 
-function sendMail(email, res, user, accepted){
+function sendMail(user){
+    var email = user.email;
+    var username = user.username;
+    var accepted = user.active;
+
+    var responseText;
+    var message;
     if(accepted){
-        var message = user + " Welcome to ERMES!";
-        var responseText = user + " Accepted."
+        message = username + " Welcome to ERMES!";
+        responseText = username + " Accepted.";
     }
     else{
-        var message = user + " I'm sorry, your registration has been refused, ask the administrators."
-        var responseText = user + " Refused."
+        message = username + " I'm sorry, your registration has been refused, ask the administrators.";
+        responseText = username + " Refused.";
 
     }
 
@@ -110,10 +112,11 @@ function sendMail(email, res, user, accepted){
 
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
-            console.log(error);
-            return res.jsonp({"error": "Problem sending confirmation mail."});
+            console.error('[EMAIL]: '+ JSON.stringify(error));
+            loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
+        } else {
+            console.log('[EMAIL]: '+ JSON.stringify(info));
+            loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
         }
-        res.status(201).send(responseText);
     });
-
 }

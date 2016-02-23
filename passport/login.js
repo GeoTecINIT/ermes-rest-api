@@ -28,10 +28,13 @@ module.exports = function(passport) {
           if (!isValidPassword(user, password)) {
             return done(null, false, {message: "WRONG_PASSWORD"});
           }
-          /*if(!user.activeAccount){
+
+          // Not allowed if inactive
+          if(!user.active){
            console.log("Account Not Actived: "+ username);
            return done(null, false, {message: "INACTIVE_ACCOUNT"});
-           }*/
+           }
+
           //All works fine.
           return done(null, user, {});
         }).catch((err) => {

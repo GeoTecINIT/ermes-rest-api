@@ -20,9 +20,8 @@ module.exports = function(passport)
     var mailer = require("./routes/mailer");
     router.use("/sendmail", mailer());
 
-    // TODO: Change the way of user lookup
-    //var acceptRegistration = require("./routes/accept-registration");
-    //router.use("/accept-registration", acceptRegistration());
+    var acceptRegistration = require("./routes/accept-registration");
+    router.use("/accept-registration", acceptRegistration());
 
     var infoTemplates = require("./routes/info-template")();
     router.use("/info-template", infoTemplates);
