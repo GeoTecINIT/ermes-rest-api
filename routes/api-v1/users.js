@@ -194,7 +194,7 @@ function calculateLanguage(region){
 function sendMail(emails, user, extraInfo){
     console.log(emails);
     var to = emails;
-    var subject = "New ERMES Registration";
+    var subject = "New ERMES Registration [user: " + user.username + "]";
     var message = "User " + user.username + " " + extraInfo + ". ACCEPT OR DECLINE (" + user.email + ")";
 
     var urlAccept = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&accepted=true";
