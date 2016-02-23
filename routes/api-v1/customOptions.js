@@ -10,6 +10,27 @@ var CustomOptions = sequelize.import(path.resolve('./models/local/customOption')
 
 module.exports = function() {
 
+    router.get('/', function(req, res) {
+        var user = req.user;
+
+        user.getOptions().then((options) => {
+            var response = {customOptions: []};
+
+            defaults.customOptionProducts.forEach((productType) => {
+                var customOption = {id: productType};
+                customOption.options = _.map(_.filter(options, (option) => option.productType === productType), (option) => {
+                    return _.pick(option, ['text', 'value']);
+                });
+                response.customOptions.push(customOption);
+            });
+
+            res.status(200).json(response);
+        }).catch(() => {
+            console.error('USER OPTIONS ERROR: ' + user.username);
+            res.status(404).json({errors: [{type: "UnexpectedError", message: "Error retrieving user options"}]});
+        });
+    });
+
     router.use('/:productType', function(req, res, next) {
         var productType = req.params.productType;
         if (_.contains(defaults.customOptionProducts, productType)) {
