@@ -10,7 +10,7 @@ module.exports = function(sequelize, Sequelize) {
     comments: Sequelize.TEXT, // Nullable
     longitude: Sequelize.REAL, // Nullable
     latitude: Sequelize.REAL, // Nullable
-    file: {type: Sequelize.STRING, allowNull: false, defaultValue: ''} // Nullable
+    file: {type: Sequelize.STRING} // Nullable
   });
 
   // Append general product info like: upload date, user who uploaded, parcels where applied, etc.
