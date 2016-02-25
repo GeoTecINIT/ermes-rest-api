@@ -285,7 +285,7 @@
         "default": false,
         "yAxis": "Regional Meteo WS Average WindSpeed [m s-1]",
         "plotType": 1
-      },
+      }
 
     ]
   },

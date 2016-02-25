@@ -1,5 +1,4 @@
 var sequelize = require('../../initializers/db');
-
 var Parcel = sequelize.import('./parcel');
 
 module.exports = function(sequelize, Sequelize) {
