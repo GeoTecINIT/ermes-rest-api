@@ -103,7 +103,7 @@ function sendMail(emails, parcel, alert){
     var type = "The danger that triggered the alert was: " + alert.type;
     var value = "The actual value for this alert is: " + alert.value;
 
-    var redirect = "Please connect to the Geoportal for more info.";
+    var redirect = "Please connect to the Geoportal for more info. ";
     var geoportal = "http://ermes.dlsi.uji.es/prototype/geoportal";
 
     var htmlText = "<p>" + message + "</p>";
