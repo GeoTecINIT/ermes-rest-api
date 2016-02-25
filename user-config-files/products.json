@@ -192,7 +192,101 @@
         "description": "MCARI = vegetation index calculated as recommended in the report: 'D5.7 Crop detection and  spatial variability (EP_L3)'.",
         "default": true,
         "plotType": 1
-      }
+      },
+      {
+        "configId": "121",
+        "id": "NDVI",
+        "name": "NDVI",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_MONITORING_NDVI/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_MONITORING_NVDI_LTA/ImageServer",
+        "description": "<p>This map shows the values of the Normalized Difference Vegetation Index (NDVI) for the selected date. The map was derived from MODIS satellite data. </p><p>NDVI is a dimensionless indicator of vegetation development which is strongly related to plant biomass. On rice areas, low values of the index (e.g., 3000-4000) are characteristic of Bare Soil conditions and are typical of the winter season. Values then increase with plant development, reaching maximum values (7000 - 9000) when the plant reaches maximum biomass/LAI. </p><p>Strong differences between the current year values for a given date and the average values may indicate either an anomaly in growth conditions (e.g., anticipated or delayed development due to meteo conditions), or a change in the kind of crop cultivated in the area.</p>",
+        "default": false,
+        "yAxis": "NDVI (x 10000)",
+        "plotType": 3
+      },
+
+      {
+        "configId": "122",
+        "id": "Rainfall",
+        "name": "Rainfall",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_PCUM/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_PCUM_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_PCUM_FORE/ImageServer",
+        "description": "<p>This map shows estimates of Cumulate Daily Rainfall for the selected date. The map was derived from ECMWF datasets. Unit measure are mm 1/day.</p>",
+        "default": false,
+        "yAxis": "Daily Rainfall [mm]",
+        "plotType": 1
+      },
+      {
+        "configId": "123",
+        "id": "Global Radiation",
+        "name": "Global Radiation",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_RAD/ImageServer",
+        "default": false,
+        "yAxis": "Regional Meteo RAD Daily Global Radiation [MJ m-2 day-1]",
+        "plotType": 1
+      },
+      {
+        "configId": "124",
+        "id": "Maximum Humidity",
+        "name": "Maximum Humidity",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_RHMAX/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_RHMAX_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_RHMAX_FORE/ImageServer",
+        "description": "<p>This map shows estimates of 5.2.10 Maximum Relative Humidity  for the selected date. The map was derived from ECMWF datasets. Unit measure are m 1/s</p>",
+        "default": false,
+        "yAxis": "Maximum Daily Humidity [%]",
+        "plotType": 1
+      },
+      {
+        "configId": "125",
+        "id": "Minimum Humidity",
+        "name": "Minimum Humidity",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_RHMIN/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_RHMIN_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_RHMIN_FORE/ImageServer",
+        "description": "<p>This map shows estimates of 5.2.10 Minimum Relative Humidity  for the selected date. The map was derived from ECMWF datasets. Unit measure are m 1/s</p>",
+        "default": false,
+        "yAxis": "Minimum Daily Humidity [%]",
+        "plotType": 1
+      },
+      {
+        "configId": "126",
+        "id": "Maximum Temperature",
+        "name": "Maximum Temperature",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_TMAX/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_TMAX_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_TMAX_FORE/ImageServer",
+        "description": "<p>This map shows estimates of Maximum Daily Temperature for the selected date. The map was derived from ECMWF datasets. Unit measure are &deg;C.</p><p>Strong differences between the current year values for a given date and the average values indicate anomalous meteorological conditions ,potentially affecting rice development.</p>",
+        "default": false,
+        "yAxis": "Maximum Daily Temperature [&deg;C]",
+        "plotType": 1
+      },
+      {
+        "configId": "127",
+        "id": "Minimum Temperature",
+        "name": "Minimum Temperature",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_TMIN/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_TMIN_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_TMIN_FORE/ImageServer",
+        "description": "<p>This map shows estimates of Minimum Daily Temperature for the selected date. The map was derived from ECMWF datasets.</p><p>Strong differences between the current year values for a given date and the average values indicate anomalous meteorological conditions ,potentially affecting rice development.</p>",
+        "default": false,
+        "yAxis": "Minimum Daily Temperature [&deg;C]",
+        "plotType": 1
+      },
+      {
+        "configId": "128",
+        "id": "Average WindSpeed",
+        "name": "Average WindSpeed",
+        "url": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2016-IT/REGIONAL_METEO_WS/ImageServer",
+        "historicUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_WS_LTA/ImageServer",
+        "forecastUrl": "http://ermes.dlsi.uji.es:6080/arcgis/rest/services/2015-IT/REGIONAL_METEO_WS_FORE/ImageServer",
+        "description": "<p>This map shows estimates of Average Wind Speed for the selected date. The map was derived from ECMWF datasets. Unit measure are m 1/s.</p>",
+        "default": false,
+        "yAxis": "Regional Meteo WS Average WindSpeed [m s-1]",
+        "plotType": 1
+      },
+
     ]
   },
   {

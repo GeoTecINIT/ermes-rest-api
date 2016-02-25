@@ -4,6 +4,7 @@ var express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
     passport = require("passport"),
+    path = require('path'),
     os = require('os'),
     //multer  = require('multer'),
     loggers = require('./initializers/loggers'),
@@ -40,6 +41,20 @@ app.use(cors());
 console.log('\t* Connecting to the DB...');
 module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
     "use strict";
+
+    var User = sequelize.import(path.resolve('./models/local/user'));
+    User.findAll({where: {type: 'guest'}}).then((guests) => {
+      if (guests.length === 0) {
+          User.bulkCreate([
+              {username: 'guestls', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'local', type: 'guest', email: 'guestls@ermes.com', language: 'es'},
+              {username: 'guestli', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'local', type: 'guest', email: 'guestli@ermes.com', language: 'it'},
+              {username: 'guestlg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'local', type: 'guest', email: 'guestlg@ermes.com', language: 'el'},
+              {username: 'guestrs', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'guest', email: 'guestrs@ermes.com', language: 'es'},
+              {username: 'guestri', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'regional', type: 'guest', email: 'guestri@ermes.com', language: 'it'},
+              {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el'}
+          ]);
+      }
+    });
 
     var root = require('./router');
     app.use('/', root(passport));

@@ -1,3 +1,5 @@
+var bCrypt = require('bcrypt-nodejs');
+
 module.exports = function(sequelize, Sequelize) {
   "use strict";
 
@@ -10,7 +12,11 @@ module.exports = function(sequelize, Sequelize) {
         this.setDataValue('username', val.toLowerCase().trim());
       }
     },
-    password: {type: Sequelize.STRING, allowNull: false},
+    password: {type: Sequelize.STRING, allowNull: false,
+      set: function(val) {
+        this.setDataValue('password', createHash(val));
+      }
+    },
     email: {type: Sequelize.STRING, allowNull: false, unique: true, validate: {isEmail: {msg: "FAKE_EMAIL"}}},
     region: {type: Sequelize.STRING(10), allowNull: false,
       set: function(val) {
@@ -43,3 +49,8 @@ module.exports = function(sequelize, Sequelize) {
 
   return User;
 };
+
+// Generates hash using bCrypt
+function createHash(password){
+  return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
+}

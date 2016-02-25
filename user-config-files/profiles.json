@@ -3,7 +3,7 @@
     "profileId": "IT-REGIONAL",
     "configId": "IT-REGIONAL",
     "region": "IT",
-    "products": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115],
+    "products": [121, 122, 123, 124, 125, 126, 127, 128],
     "operationalLayers": [101],
     "parcelsLayer": 101,
     "parcelFinder": false
@@ -51,6 +51,60 @@
     "products": [316, 317],
     "operationalLayers": [],
     "parcelsLayer": 301,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "IT-REGIONAL-GUEST",
+    "configId": "IT-REGIONAL",
+    "region": "IT",
+    "products": [121],
+    "operationalLayers": [],
+    "parcelsLayer": null,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "IT-LOCAL-GUEST",
+    "configId": "IT-LOCAL",
+    "region": "IT",
+    "products": [116],
+    "operationalLayers": [],
+    "parcelsLayer": null,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "SP-REGIONAL-GUEST",
+    "configId": "SP-REGIONAL",
+    "region": "SP",
+    "products": [201],
+    "operationalLayers": [],
+    "parcelsLayer": null,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "SP-LOCAL-GUEST",
+    "configId": "SP-LOCAL",
+    "region": "SP",
+    "products": [216],
+    "operationalLayers": [],
+    "parcelsLayer": null,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "GK-REGIONAL-GUEST",
+    "configId": "GK-REGIONAL",
+    "region": "GK",
+    "products": [301],
+    "operationalLayers": [],
+    "parcelsLayer": null,
+    "parcelFinder": false
+  },
+  {
+    "profileId": "GK-LOCAL-GUEST",
+    "configId": "GK-LOCAL",
+    "region": "GK",
+    "products": [316],
+    "operationalLayers": [],
+    "parcelsLayer": null,
     "parcelFinder": false
   }
 ]
