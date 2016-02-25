@@ -56,6 +56,12 @@ module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : f
       }
     });
 
+    User.findOne({where: {username: 'admin'}}).then((user) => {
+       if (!user) {
+           User.create({username: 'admin', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'admin', email: 'admin@ermes.com', language: 'en', active: true});
+       }
+    });
+
     var root = require('./router');
     app.use('/', root(passport));
 

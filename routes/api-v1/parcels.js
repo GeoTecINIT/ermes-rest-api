@@ -8,6 +8,7 @@ var config = require('../../helpers/config');
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
 var Product = sequelize.import(path.resolve('./models/local/product'));
+var Alert = sequelize.import(path.resolve('./models/local/alert'));
 
 const fieldsToOmit = ['updatedAt', 'createdAt', 'user_parcels', 'owners'];
 
@@ -141,6 +142,31 @@ module.exports = function()
         });
     });
 
+    router.use('/:parcelId/alerts', function (req, res, next) {
+        var user = req.user;
+        var parcelId = req.params.parcelId.toUpperCase();
+
+        Parcel.findOne({where: {parcelId: parcelId}, include: [{model: Alert, as: 'alerts'}]}).then((parcel) => {
+            if (!parcel) {
+                throw new Error('Parcel not found');
+            } else {
+                return getParcelUsers(parcel).then((users) => {
+                    return [users, parcel];
+                });
+            }
+        }).then((data) => {
+            req.users = data[0];
+            req.parcel = data[1];
+            next();
+        }).catch((ex) => {
+            console.error('PARCEL NOT FOUND: ' + parcelId);
+            res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
+        });
+    });
+
+    var alerts = require('./parcels/alerts');
+    router.use('/:parcelId/alerts', alerts());
+
     return router;
 };
 
@@ -219,6 +245,24 @@ function getAuthorizedParcelProducts(parcelId, users, transaction) {
         });
         return Promise.all(lazyProducts).then(() => { // Wait for all productTypes to finish their own all() promise
             return [classifiedProducts, entireProducts]; // Links, full-products
+        });
+    });
+}
+
+// Get allowed users per parcel (for alerts)
+function getParcelUsers(parcel) {
+    var users = [];
+
+    return parcel.getOwners().then((owners) => {
+        users = users.concat(owners);
+
+        var waitForAll = [];
+        owners.forEach((owner) => {
+            waitForAll.push(owner.getCollaborators().then((collaborators) => users = users.concat(collaborators)));
+        });
+
+        return Promise.all(waitForAll).then(() => {
+            return users;
         });
     });
 }
