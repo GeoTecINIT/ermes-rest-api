@@ -38,7 +38,14 @@ module.exports = function(passport) {
         var image = req.files.image;
         var user = req.user;
 
-        ImageModel.create({userId: user.userId, file: image.name}).then((data) => {
+        new Promise((resolve, reject) => {
+            if (image) {
+                return resolve();
+            }
+            return reject();
+        }).then(() => {
+            return ImageModel.create({userId: user.userId, file: image.name});
+        }).then((data) => {
             res.status(201).json({image: {id: data.id, url: config.http.PROTOCOL + config.http.HOSTNAME + ':' + config.http.PORT + '/images/' + image.name}});
         }).catch((ex) => {
             res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
