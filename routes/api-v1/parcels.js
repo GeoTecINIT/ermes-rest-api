@@ -181,7 +181,7 @@ function getFullParcelResponse(user, parcel, options) {
 
 function getAuthorizedParcelProducts(parcelId, users, transaction) {
     // First create the options object that we are going to pass to the products find query
-    var options = {includes: [
+    var options = {include: [
         {model: User, as: 'user', where: {userId: {$in: users}}},
         {model: Parcel, as: 'parcels', where: {parcelId: parcelId}}
     ], order: [['uploadDate', 'DESC']]};
@@ -204,7 +204,7 @@ function getAuthorizedParcelProducts(parcelId, users, transaction) {
                     var plainProduct = product.get({plain: true});
                     innerProduct = innerProduct.get({plain: true});
                     _.extend(plainProduct, innerProduct);
-                    plainProduct = _.omit(plainProduct, ['createdAt', 'updatedAt', 'type', 'userId']);
+                    plainProduct = _.omit(plainProduct, ['createdAt', 'updatedAt', 'type', 'userId', 'user', 'parcels']);
                     return plainProduct; // Once the innerProduct has been retrieved, return the final object formatted
                 });
             });
