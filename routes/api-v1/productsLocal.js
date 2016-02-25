@@ -11,7 +11,7 @@ var Product = sequelize.import(path.resolve('./models/local/product'));
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
 
-const ommitedProductFields = ['createdAt', 'updatedAt', 'id', 'userId', 'type'];
+const ommitedProductFields = ['createdAt', 'updatedAt', 'id', 'userId', 'type', 'owners'];
 
 module.exports = function() {
 
@@ -75,7 +75,7 @@ module.exports = function() {
 
     function checkAndAddProductToParcel(parcelIds, userIds, product, t) {
         return Parcel.findAll({where: {parcelId: {$in: parcelIds}},
-            includes: [{model: User, as: 'owners', where: {userId: {$in: userIds}}}], transaction: t}).then((parcels) => {
+            include: [{model: User, as: 'owners', where: {userId: {$in: userIds}}}], transaction: t}).then((parcels) => {
             if (parcels.length !== parcelIds.length) {
                 throw Error('You do not own all those parcels');
             }

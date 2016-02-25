@@ -39,7 +39,7 @@ module.exports = function() {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
                     Parcel.findAll({where: {parcelId: parcelId},
-                        includes: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
+                        include: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
@@ -108,7 +108,7 @@ module.exports = function() {
                     if (!_.contains(parcelIds, parcelId)) {
                         reject(new Error('You do not own that parcel'));
                     } else {
-                        findWARMProducts(user.region, parcelId, attributes, year, doy).then((predictions) => {
+                        findWARMProducts(user.region, parcelId.toUpperCase(), attributes, year, doy).then((predictions) => {
                             var product = [];
                             predictions.forEach((prediction) => {
                                 var plainPrediction = prediction.get({plain: true});
@@ -125,7 +125,7 @@ module.exports = function() {
                     var ownerIds = _.map(owners, (owner) => owner.userId);
 
                     Parcel.findAll({where: {parcelId: parcelId},
-                        includes: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
+                        include: [{model: User, as: 'owners', where: {userId: {$in: ownerIds}}}]}).then((parcels) => {
                         if (parcels.length === 0) {
                             reject(new Error('You do not have access to that parcel'));
                         } else {
@@ -162,13 +162,13 @@ module.exports = function() {
         var WARM = sequelize.import(path.resolve('./models/warm/outWARM_' + region));
 
         return WARM.findAll({attributes: attributes,
-            where: {year: year, parcelId: parcelId, doy: {$between: [doy, doy+4]}}}).then((products) => {
+            where: {year: year, parcelId: parcelId.toUpperCase(), doy: {$between: [doy, doy+4]}}}).then((products) => {
 
             if (products.length !== 0 && products.length < 5) { // If end of year is close
                 var remaining = 5 - products.length;
 
                 return WARM.findAll({attributes: attributes,
-                    where: {year: year+1, parcelId: parcelId, doy: {$between: [1, remaining-1]}}}).then((productsNewYear) => {
+                    where: {year: year+1, parcelId: parcelId.toUpperCase(), doy: {$between: [1, remaining-1]}}}).then((productsNewYear) => {
                     return products.concat(productsNewYear);
                 });
             } else {
