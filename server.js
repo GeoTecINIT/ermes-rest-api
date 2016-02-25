@@ -46,12 +46,12 @@ module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : f
     User.findAll({where: {type: 'guest'}}).then((guests) => {
       if (guests.length === 0) {
           User.bulkCreate([
-              {username: 'guestls', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'local', type: 'guest', email: 'guestls@ermes.com', language: 'es'},
-              {username: 'guestli', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'local', type: 'guest', email: 'guestli@ermes.com', language: 'it'},
-              {username: 'guestlg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'local', type: 'guest', email: 'guestlg@ermes.com', language: 'el'},
-              {username: 'guestrs', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'guest', email: 'guestrs@ermes.com', language: 'es'},
-              {username: 'guestri', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'regional', type: 'guest', email: 'guestri@ermes.com', language: 'it'},
-              {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el'}
+              {username: 'guestls', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'local', type: 'guest', email: 'guestls@ermes.com', language: 'es', active: true},
+              {username: 'guestli', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'local', type: 'guest', email: 'guestli@ermes.com', language: 'it', active: true},
+              {username: 'guestlg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'local', type: 'guest', email: 'guestlg@ermes.com', language: 'el', active: true},
+              {username: 'guestrs', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'guest', email: 'guestrs@ermes.com', language: 'es', active: true},
+              {username: 'guestri', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'regional', type: 'guest', email: 'guestri@ermes.com', language: 'it', active: true},
+              {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el', active: true}
           ]);
       }
     });
