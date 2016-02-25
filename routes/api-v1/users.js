@@ -26,9 +26,6 @@ module.exports = function(passport)
 
             if (req.body.user) {
                 var user = req.body.user;
-                /*if (user.password) {
-                    user.password = createHash(user.password);
-                }*/
                 if (user.region) {
                     user.language = calculateLanguage(user.region);
                     var lastPosition = defaults.regions[user.region];
@@ -155,7 +152,6 @@ module.exports = function(passport)
                         if (!bCrypt.compareSync(attributesToChange.oldPassword, user.password)) {
                             throw new Error('PASSWORD_MISMATCH');
                         }
-                        //attributesToChange.password = createHash(attributesToChange.password);
                     } else {
                         attributesToChange = _.omit(attributesToChange, ['password']);
                     }

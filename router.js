@@ -29,6 +29,9 @@ module.exports = function(passport)
     var formTemplates = require("./routes/form-template")();
     router.use("/form-template", formTemplates);
 
+    var images = require("./routes/images");
+    router.use("/images", images(passport));
+
     var login = require("./routes/auth/login");
     router.use("/login", login(passport));
 

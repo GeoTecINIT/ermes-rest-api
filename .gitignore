@@ -37,3 +37,6 @@ node_modules
 
 #Sensible files
 config/environment.js
+
+#Image files
+images/*

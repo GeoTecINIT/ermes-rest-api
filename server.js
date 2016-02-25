@@ -6,11 +6,11 @@ var express = require("express"),
     passport = require("passport"),
     path = require('path'),
     os = require('os'),
-    //multer  = require('multer'),
     loggers = require('./initializers/loggers'),
     sequelize = require('./initializers/db'),
     config = require('./config/environment'),
-    cors = require('cors');
+    cors = require('cors'),
+    defaultUsers = require('./initializers/defaultUsers');
 
 console.log('\n# ERMES API server');
 console.log('\t* Booting up...');
@@ -21,14 +21,6 @@ app.set('json spaces', 3);
 // Enable JSON parse on request body
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
-
-/*
-app.use(multer({
-    dest: './uploads/'
-    //onFileUploadComplete: function(file, req, res) {
-    //    console.log("FILEEEE: " + file);
-    //}
-}));*/
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -42,25 +34,8 @@ console.log('\t* Connecting to the DB...');
 module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
     "use strict";
 
-    var User = sequelize.import(path.resolve('./models/local/user'));
-    User.findAll({where: {type: 'guest'}}).then((guests) => {
-      if (guests.length === 0) {
-          User.bulkCreate([
-              {username: 'guestls', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'local', type: 'guest', email: 'guestls@ermes.com', language: 'es', active: true},
-              {username: 'guestli', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'local', type: 'guest', email: 'guestli@ermes.com', language: 'it', active: true},
-              {username: 'guestlg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'local', type: 'guest', email: 'guestlg@ermes.com', language: 'el', active: true},
-              {username: 'guestrs', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'guest', email: 'guestrs@ermes.com', language: 'es', active: true},
-              {username: 'guestri', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'regional', type: 'guest', email: 'guestri@ermes.com', language: 'it', active: true},
-              {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el', active: true}
-          ]);
-      }
-    });
-
-    User.findOne({where: {username: 'admin'}}).then((user) => {
-       if (!user) {
-           User.create({username: 'admin', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'admin', email: 'admin@ermes.com', language: 'en', active: true});
-       }
-    });
+    // Init guests and admin
+    defaultUsers.init();
 
     var root = require('./router');
     app.use('/', root(passport));

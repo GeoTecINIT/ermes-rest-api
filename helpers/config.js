@@ -1,7 +1,7 @@
 module.exports = {
     proxyUrl: "/proxy",
-    port: 6686,
-    mongoDbUrl: 'mongodb://localhost/serverermesapp',
+    //port: 6686,
+    //mongoDbUrl: 'mongodb://localhost/serverermesapp',
     regions: {
         'spain': {
             "lastLongitude": -0.3,
