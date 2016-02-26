@@ -156,10 +156,10 @@ module.exports = function() {
 
         sequelize.transaction((t) => {
             return new Promise((resolve, reject) => {
-                var allowedUsers = [user.username];
+                var allowedUsers = [user.userId];
                 if (user.type === 'collaborator') {
                     return user.getOwners({transaction: t}).then((owners) => {
-                       var ownerIds = _.map(owners, (owner) => owner.username);
+                       var ownerIds = _.map(owners, (owner) => owner.userId);
                        return resolve(allowedUsers.concat(ownerIds));
                     }).catch((err) => reject(err));
                 } else {
@@ -193,10 +193,10 @@ module.exports = function() {
 
         sequelize.transaction((t) => {
             return new Promise((resolve, reject) => {
-                var allowedUsers = [user.username];
+                var allowedUsers = [user.userId];
                 if (user.type === 'collaborator') {
                     return user.getOwners({transaction: t}).then((owners) => {
-                        var ownerIds = _.map(owners, (owner) => owner.username);
+                        var ownerIds = _.map(owners, (owner) => owner.userId);
                         return resolve(allowedUsers.concat(ownerIds));
                     }).catch((err) => reject(err));
                 } else {
