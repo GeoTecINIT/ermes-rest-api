@@ -41,7 +41,8 @@ module.exports = {
         "cropInfos",
         "insects",
         "diseases",
-        "weeds"
+        "weeds",
+        "fertilizers"
     ],
     allWARMProducts: [
         {name: "biomasses", column: "actgroundBiomass"},
