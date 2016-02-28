@@ -73,8 +73,14 @@ module.exports = function(passport)
             }
             res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
         }).catch((ex) => {
-            console.error('ERROR CREATING USER: ' + ex);
-            res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
+            if (!ex.errors || !ex.errors.length) {
+                console.error('ERROR CREATING USER: ' + ex);
+                res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
+            } else {
+                console.error('ERROR CREATING USER: ' + ex);
+                var error = ex.errors[0];
+                res.status(200).json({errors: [{type: ex.name, message: error.message}]});
+            }
         });
     });
 
@@ -161,8 +167,14 @@ module.exports = function(passport)
             }).then(() => {
                 res.status(200).json({user: _.omit(user.get({plain: true}), userAttribsToOmit)});
             }).catch((ex) => {
-                console.error('ERROR UPDATING USER: ' + ex);
-                res.status(200).json(({errors: [{type: ex.name, message: ex.message}]}));
+                if (!ex.errors || !ex.errors.length) {
+                    console.error('ERROR CREATING USER: ' + ex);
+                    res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
+                } else {
+                    console.error('ERROR CREATING USER: ' + ex);
+                    var error = ex.errors[0];
+                    res.status(200).json({errors: [{type: ex.name, message: error.message}]});
+                }
             });
 
         }

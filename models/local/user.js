@@ -17,7 +17,7 @@ module.exports = function(sequelize, Sequelize) {
         this.setDataValue('password', createHash(val));
       }
     },
-    email: {type: Sequelize.STRING, allowNull: false, unique: true, validate: {isEmail: {msg: "FAKE_EMAIL"}}},
+    email: {type: Sequelize.STRING, allowNull: false, /*unique: true,*/ validate: {isEmail: {msg: "FAKE_EMAIL"}}},
     region: {type: Sequelize.STRING(10), allowNull: false,
       set: function(val) {
         this.setDataValue('region', (""+val).toLowerCase().trim());
