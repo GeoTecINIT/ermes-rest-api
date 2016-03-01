@@ -13,18 +13,20 @@ module.exports = function() {
     router.get('/', function(req, res) {
         var user = req.user;
 
-        user.getOptions().then((options) => {
-            var response = {customOptions: []};
+        getInvolvedPeopleIDs(user).then((userIds) => {
+            return CustomOptions.findAll({where: {userId: {$in: userIds}}}).then((options) => {
+                var response = {customOptions: []};
 
-            defaults.customOptionProducts.forEach((productType) => {
-                var customOption = {id: productType};
-                customOption.options = _.map(_.filter(options, (option) => option.productType === productType), (option) => {
-                    return _.pick(option, ['text', 'value']);
+                defaults.customOptionProducts.forEach((productType) => {
+                    var customOption = {id: productType};
+                    customOption.options = _.map(_.filter(options, (option) => option.productType === productType), (option) => {
+                        return _.pick(option, ['text', 'value']);
+                    });
+                    response.customOptions.push(customOption);
                 });
-                response.customOptions.push(customOption);
-            });
 
-            res.status(200).json(response);
+                res.status(200).json(response);
+            });
         }).catch(() => {
             console.error('USER OPTIONS ERROR: ' + user.username);
             res.status(404).json({errors: [{type: "UnexpectedError", message: "Error retrieving user options"}]});
@@ -46,13 +48,15 @@ module.exports = function() {
         var user = req.user;
         var productType = req.params.productType;
 
-        user.getOptions().then((options) => {
-            var response = {};
-            response.customOption = {id: productType};
-            response.customOption.options = _.map(_.filter(options, (option) => option.productType === productType), (option) => {
-                return _.pick(option, ['text', 'value']);
+        getInvolvedPeopleIDs(user).then((userIds) => {
+            return CustomOptions.findAll({where: {userId: {$in: userIds}}}).then((options) => {
+                var response = {};
+                response.customOption = {id: productType};
+                response.customOption.options = _.map(_.filter(options, (option) => option.productType === productType), (option) => {
+                    return _.pick(option, ['text', 'value']);
+                });
+                res.status(200).json(response);
             });
-            res.status(200).json(response);
         }).catch(() => {
             console.error('USER OPTIONS ERROR: ' + user.username);
             res.status(404).json({errors: [{type: "UnexpectedError", message: "Error retrieving user options"}]});
@@ -116,3 +120,33 @@ module.exports = function() {
     return router;
 
 };
+
+function getInvolvedPeopleIDs(user) {
+    var users = []; // Users which are sharing custom options
+
+    if (user.type === 'collaborator') {
+        return user.getOwners().then((owners) => {
+            users = users.concat(owners); // Add owners
+            var waitForAll = [];
+
+            // Add other collaborators
+            owners.forEach((owner) => {
+                waitForAll.push(owner.getCollaborators().then((collaborators) => users = users.concat(collaborators)));
+            });
+
+            return Promise.all(waitForAll);
+        }).then(() => {
+            users = _.map(users, (user) => user.userId);
+            return users;
+        });
+    } else { // Owner, admin or guest
+        users = users.concat(user);
+
+        return user.getCollaborators().then((collaborators) => {
+            users = users.concat(collaborators);
+        }).then(() => {
+            users = _.map(users, (user) => user.userId);
+            return users;
+        });
+    }
+}
