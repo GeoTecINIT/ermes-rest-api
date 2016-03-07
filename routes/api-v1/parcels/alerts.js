@@ -68,18 +68,18 @@ module.exports = function() {
         var user = req.user;
         var users = req.users;
 
-        new Promise((resolve, reject) => {
+        sequelize.transaction((t) => {
             var userIds = _.pluck(users, 'userId');
             if (!_.contains(userIds, user.userId)) {
-                reject(new Error('You are not allowed to access this parcel'));
-            } else {
-                var response = parcel.get({plain: true}).alerts;
-                Alert.destroy({where: {parcelId: parcel.parcelId}}).then(() => {
-                    resolve(response);
-                }).catch((err) => {
-                    reject(err);
-                });
+                throw new Error('You are not allowed to access this parcel');
             }
+
+            var response = parcel.get({plain: true}).alerts;
+            return Alert.destroy({where: {parcelId: parcel.parcelId}, transaction: t}).then(() => {
+                return parcel.update({inDanger: false}, {transaction: t});
+            }).then(() => {
+                return response;
+            });
         }).then((alerts) => {
             res.status(200).json({alerts: alerts});
         }).catch((ex) => {
