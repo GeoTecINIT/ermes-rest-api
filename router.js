@@ -34,6 +34,9 @@ module.exports = function(passport)
 
     var login = require("./routes/auth/login");
     router.use("/login", login(passport));
+    
+    var parcelCoords = require("./routes/parcel-coords");
+    router.use("/parcel-coords", parcelCoords());
 
     return router;
 };

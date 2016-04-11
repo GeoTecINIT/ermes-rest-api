@@ -13,13 +13,13 @@ module.exports = function()
         }
         else {
             req.pipe(request(urlData[1]))
-                .on('response', function (response) {
-                    //console.log("PROXY: Redirect: " + urlData[1]);
-                })
-                .on('error', function (err) {
-                    //console.log("PROXY: Illegal arg catched" + err);
-                })
-                .pipe(res);
+              .on('response', function (response) {
+                  //console.log("PROXY: Redirect: " + urlData[1]);
+              })
+              .on('error', function (err) {
+                  //console.log("PROXY: Illegal arg catched" + err);
+              })
+              .pipe(res);
         }
     });
     return router;
