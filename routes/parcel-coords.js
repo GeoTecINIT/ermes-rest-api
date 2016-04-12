@@ -6,6 +6,11 @@ var config = require('helpers/config');
 
 const OUT_SPATIAL_REFERENCE = 102100;
 const DELIMITER = /#/;
+const errors = {
+  MISSING_PARAMETERS: "MISSING_PARAMETERS",
+  WRONG_INPUT: "WRONG_INPUT",
+  SERVICE_DOWN: "SERVICE_DOWN"
+};
 
 var mem = new Map();
 
@@ -15,7 +20,7 @@ module.exports = function()
     const q = req.query;
 
     if (!q.town || !q.polygon || !q.parcel) {
-      return errorHandler(res);
+      return errorHandler(errors.MISSING_PARAMETERS, res);
     }
 
     var parameters = {
@@ -25,7 +30,7 @@ module.exports = function()
     };
 
     if (`${parameters.town}${parameters.polygon}${parameters.parcel}`.match(DELIMITER)) {
-      return errorHandler(res);
+      return errorHandler(errors.WRONG_INPUT, res);
     }
 
     var key = `${parameters.town}#${parameters.polygon}#${parameters.parcel}`;
@@ -39,7 +44,7 @@ module.exports = function()
           mem.set(key, projectedCoords);
           res.json(projectedCoords);
         });
-      }).catch((err) => errorHandler(res));
+      }).catch((err) => errorHandler(err, res));
     }
   });
   return router;
@@ -50,17 +55,22 @@ function getCatastralReference(parameters) {
     request(`http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPPP?Provincia=Valencia&Municipio=${parameters.town}&Poligono=${parameters.polygon}&Parcela=${parameters.parcel}`,
       (err, response, body) => {
         if (err || response.statusCode !== 200) {
-          reject(err);
+          reject(errors.SERVICE_DOWN, err);
         } else {
           parseString(body, (err, xmlObject) => {
             if (err) {
-              reject(err);
+              reject(errors.WRONG_INPUT);
             } else {
               var docContent = xmlObject['consulta_dnp'];
               if (docContent.control[0].cuerr) {
-                reject(null);
+                reject(errors.WRONG_INPUT);
               } else {
-                var catastralReference = docContent.bico[0].bi[0].idbi[0].rc[0];
+                var catastralReference;
+                if (docContent.control[0].cudnp[0] > 1) {
+                  catastralReference = docContent.lrcdnp[0].rcdnp[0].rc[0];
+                } else {
+                  catastralReference = docContent.bico[0].bi[0].idbi[0].rc[0];
+                }
                 resolve(catastralReference.pc1[0] + catastralReference.pc2[0]);
               }
             }
@@ -75,15 +85,15 @@ function getParcelCoordinates(catastralReference) {
     request(`http://ovc.catastro.meh.es//ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS=&RC=${catastralReference}`,
       (err, response, body) => {
         if (err || response.statusCode !== 200) {
-          reject(err);
+          reject(errors.SERVICE_DOWN);
         } else {
           parseString(body, (err, xmlObject) => {
             if (err) {
-              reject(err);
+              reject(errors.WRONG_INPUT);
             } else {
               var docContent = xmlObject['consulta_coordenadas'];
               if (docContent.control[0].cuerr[0] !== '0') {
-                reject(null);
+                reject(errors.WRONG_INPUT);
               } else {
                 var coords = docContent.coordenadas[0].coord[0].geo[0];
                 var response = {
@@ -115,7 +125,7 @@ function transformCoordinates(parcelCoords) {
         geometries: JSON.stringify(geometries), f: 'pjson'}},
       (err, response, body) => {
         if (err || response.statusCode !== 200) {
-          reject(err);
+          reject(errors.SERVICE_DOWN);
         } else {
           var projectedGeometries = JSON.parse(body);
           var stylizedResponse = {parcelCoords: projectedGeometries.geometries[0]};
@@ -126,6 +136,6 @@ function transformCoordinates(parcelCoords) {
   });
 }
 
-function errorHandler(res) {
-  res.status(404).send("Not found");
+function errorHandler(err, res) {
+  res.status(404).json({error: err});
 }
