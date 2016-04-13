@@ -11,6 +11,9 @@ var Product = sequelize.import(path.resolve('./models/local/product'));
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
 
+var TemplateLoader = require('../../utils/template-loader');
+var Mailer = require('../../utils/mailer');
+
 const ommitedProductFields = ['createdAt', 'updatedAt', 'id', 'userId', 'type', 'owners'];
 
 module.exports = function() {
@@ -68,6 +71,7 @@ module.exports = function() {
         }).then((result) => {
             var product = buildProduct(result, productType);
             res.status(201).json(product);
+            sendProductIfNeeded({product: product[productType], type: productType, parcels: parcelIds}, user);
         }).catch((ex) => {
             console.error('ERROR CREATING PRODUCT: ' + ex);
             res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
@@ -256,3 +260,21 @@ module.exports = function() {
 
     return router;
 };
+
+function sendProductIfNeeded(product, user) {
+    var subject = "ERMES: " + user.username + " wants to share this observation with you";
+
+    User.findAll({attributes: ['email'], where: {region: user.region, 
+        $and: {enableNotifications: true, $and: {active: true}}}}).then((users) => {
+        
+        var emails = _.without(_.map(users, (user) => user.email), user.email);
+        TemplateLoader.loadTemplate('product', product.type).then((productTemplate) => {
+            return TemplateLoader.compileMailTemplate('product-notification', {parcels: product.parcels,
+                product: product.product, productTemplate, user});
+        }).then((html) => {
+            Mailer.sendMail(emails, subject, html);
+        }).catch((err) => {
+            console.error(err);
+        });
+    });
+}

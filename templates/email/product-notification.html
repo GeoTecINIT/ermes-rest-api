@@ -1,0 +1,17 @@
+<h3>User <%= user.username %> thinks that this observation could be of your interest</h3>
+<br/>
+<p>
+    Seen at parcel/s: <b><%= parcels %></b>
+</p>
+<p>
+    <% var date = new Date(product.uploadDate).toGMTString(); %>
+    Upload date: <b><%= date %><b>
+</p>
+<p>
+    <% var productHtml = productTemplate({product}); %>
+    <%= productHtml %>
+</p>
+<br/>
+<p>
+    Don't want to receive this kind of <b>notifications</b> anymore? You can disable them through you profile settings in the SmartApp.<a href="http://ermes.dlsi.uji.es/prototype/smartapp">http://ermes.dlsi.uji.es/prototype/smartapp</a>
+</p>
