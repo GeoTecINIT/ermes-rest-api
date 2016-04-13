@@ -1,0 +1,23 @@
+<h3>User <%= user.username %> wants to become an ERMES member</h3>
+<br/>
+<p>
+    User <b><%= user.username %></b>, is trying to register. Do you want to accept or reject the registration?
+</p>
+<p>
+    Extra info:
+    <ul>
+        <li>Email: <%= user.email %></li>
+        <li>Region: <%= user.region %></li>
+        <li>Profile: <%= user.profile %></li>
+    </ul>
+</p>
+<p>
+    To <b>ACCEPT</b>, follow this link: <a href="<%=url.accept%>"><%=url.accept%></a>
+</p>
+<p>
+    To <b>REJECT</b>, follow this link: <a href="<%=url.reject%>"><%=url.reject%></a>
+</p>
+<br/>
+<p>
+    This email has been sent internally to all the other ERMES administrators.
+</p>

@@ -2,11 +2,12 @@ var path = require('path');
 var express = require('express');
 var router = express.Router();
 
-var loggers = require('../initializers/loggers');
-
 var sequelize = require('../initializers/db');
 var User = sequelize.import(path.resolve('./models/local/user'));
 var ActivationToken = sequelize.import(path.resolve('./models/local/activationToken'));
+
+var TemplateLoader = require('../utils/template-loader');
+var Mailer = require('../utils/mailer');
 
 module.exports = function()
 {
@@ -43,86 +44,22 @@ module.exports = function()
         });
     });
 
-    //router.use(function(req, res, next){
-    //    if(req.header("X-Auth-Key")) {
-    //        var apiKey = req.header("X-Auth-Key");
-    //
-    //        var auth1 = apiKey.split(';')[0];
-    //        var auth2= apiKey.split(';')[1];
-    //        if(! (auth1=="ermesAdmin" && auth2=="2016.admin") ){
-    //            res.status(403).send("Forbidden Access");
-    //        }
-    //
-    //        else{
-    //            var username = req.body.username;
-    //            var mail = req.body.email;
-    //            var accepted = req.body.accepted;
-    //
-    //            if(!accepted){
-    //                sendMail(mail, res, username, false);
-    //            }
-    //            else{
-    //                User.findOne({'username': username}, function (err, user) {
-    //                    if (err) {
-    //                        res.status(500).send(err.message);
-    //                    }
-    //                    else if (!user) {
-    //                        res.status(401).send("User not found.");
-    //                    }
-    //                    else if (user) {
-    //                        user.activeAccount = true;
-    //                        user.save();
-    //                        sendMail(mail, res, username, true);
-    //                    }
-    //                });
-    //            }
-    //        }
-    //    }
-    //    else{
-    //        res.status(403).send("Forbidden Access");
-    //    }
-    //});
     return router;
 };
 
 function sendMail(user){
-    var email = user.email;
-    var username = user.username;
-    var accepted = user.active;
+    var subject = "ERMES Registration Response for user: " + user.username;
 
-    var responseText;
-    var message;
-    if(accepted){
-        message = username + " Welcome to ERMES!";
-        responseText = username + " Accepted.";
-    }
-    else{
-        message = username + " I'm sorry, your registration has been refused, ask the administrators.";
-        responseText = username + " Refused.";
-
+    var template;
+    if (user.active) {
+        template = "registration-accepted";
+    } else {
+        template = "registration-rejected";
     }
 
-
-    var to = email;
-    var subject = "ERMES Registration Response";
-
-    var nodemailer = require("nodemailer");
-    var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
-
-    var mailOptions = {
-        from: 'ERMES <ermesmailer@gmail.com>', // sender address
-        to: to,
-        subject: subject,
-        text: message
-    };
-
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.error('[EMAIL]: '+ JSON.stringify(error));
-            loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
-        } else {
-            console.log('[EMAIL]: '+ JSON.stringify(info));
-            loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
-        }
+    TemplateLoader.compileMailTemplate(template, {user}).then((html) => {
+        Mailer.sendMail([user.email], subject, html);
+    }).catch((err) => {
+        console.error(err);
     });
 }

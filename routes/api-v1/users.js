@@ -15,6 +15,9 @@ var defaults = require('../../helpers/config');
 var config = require('../../config/environment');
 var loggers = require('../../initializers/loggers');
 
+var TemplateLoader = require('../utils/template-loader');
+var Mailer = require('../utils/mailer');
+
 const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 
 module.exports = function(passport)
@@ -67,9 +70,9 @@ module.exports = function(passport)
 
             if (data.owner) {
                 var owner = data.owner;
-                sendMail([owner.email], user, "wants to collaborate with you");
+                sendMail([owner.email], user);
             } else {
-                sendMail(administrators, user, "is trying to register");
+                sendMail(administrators, user);
             }
             res.status(201).json({user: _.omit(user.get({plain: true}), ['userId', 'password', 'updatedAt', 'createdAt']) });
         }).catch((ex) => {
@@ -199,45 +202,29 @@ function calculateLanguage(region){
     return regions[region];
 }
 
-// Send a confirmation email
-function sendMail(emails, user, extraInfo){
-    console.log(emails);
+
+function sendMail(emails, user){
 
     ActivationToken.create({userId: user.userId}).then((token) => {
-        var to = emails;
-        var subject = "New ERMES Registration [user: " + user.username + "]";
-        var message = "User " + user.username + " " + extraInfo + ". ACCEPT OR DECLINE (" + user.email + ")";
-
-        var urlAccept = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.accept;
-        var urlDecline = config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.reject;
-
-        var htmlText = "<p>" + message + "</p>";
-
-        var buttonAccept = "<p><a href=" + urlAccept + ">ACCEPT USER</a></p>";
-        var buttonDecline = "<p><a href=" + urlDecline + ">DECLINE USER</a></p>";
-
-        var htmlContent =  "<br>" + htmlText + "<br>" + buttonAccept + "<br>" + buttonDecline;
-
-        var nodemailer = require("nodemailer");
-
-        var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
-
-        var mailOptions = {
-            from: 'ERMES <ermesmailer@gmail.com>', // sender address
-            to: to,
-            subject: subject,
-            html: htmlContent,
-            text: message
+        var url = {
+            accept: config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.accept,
+            reject: config.http.PROTOCOL + config.http.HOSTNAME + ":" + config.http.PORT + "/accept-registration?userId=" + user.userId + "&token=" + token.reject
         };
 
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error){
-                console.error('[EMAIL]: '+ JSON.stringify(error));
-                loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
-            } else {
-                console.log('[EMAIL]: '+ JSON.stringify(info));
-                loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
-            }
+        var subject;
+        var template;
+        if (user.type === 'collaborator') {
+            subject = "New ERMES Collaboration Proposal [user: " + user.username + "]";
+            template = 'new-collaborator';
+        } else {
+            subject = "New ERMES Registration [user: " + user.username + "]";
+            template = 'new-registration';
+        }
+
+        TemplateLoader.compileMailTemplate(template, {user, url}).then((html) => {
+            Mailer.sendMail(emails, subject, html);
+        }).catch((err) => {
+            console.error(err);
         });
     });
 

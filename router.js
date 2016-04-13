@@ -38,5 +38,8 @@ module.exports = function(passport)
     var parcelCoords = require("./routes/parcel-coords");
     router.use("/parcel-coords", parcelCoords());
 
+    var emailTesting = require("./routes/email-testing");
+    router.use("/email-testing", emailTesting());
+
     return router;
 };

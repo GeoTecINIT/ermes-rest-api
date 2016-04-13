@@ -2,12 +2,13 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 
-
-var loggers = require('../../../initializers/loggers');
 var _ = require('underscore');
 _.mixin(require('underscore.inflections'));
 var sequelize = require('../../../initializers/db');
 var Alert = sequelize.import(path.resolve('./models/local/alert'));
+
+var TemplateLoader = require('../../../utils/template-loader');
+var Mailer = require('../../../utils/mailer');
 
 module.exports = function() {
 
@@ -54,7 +55,7 @@ module.exports = function() {
                 });
             });
         }).then((alert) => {
-            var userMails = _.map(users, (user) => user.email);
+            var userMails = _.pluck(_.filter(users, (user) => user.enableAlerts), 'email');
             sendMail(userMails, parcel, alert);
             res.status(201).json({alert: alert});
         }).catch((ex) => {
@@ -92,46 +93,11 @@ module.exports = function() {
 
 };
 
-// Send a confirmation email
 function sendMail(emails, parcel, alert){
-    console.log(emails);
-
-    var to = emails;
     var subject = "Parcel is in danger [parcelId: " + parcel.parcelId + "]";
-    var message = "A new alert has appeared on parcel " + parcel.parcelId + ".";
-
-    var type = "The danger that triggered the alert was: " + alert.type;
-    var value = "The actual value for this alert is: " + alert.value;
-
-    var redirect = "Please connect to the Geoportal for more info. ";
-    var geoportal = "http://ermes.dlsi.uji.es/prototype/geoportal";
-
-    var htmlText = "<p>" + message + "</p>";
-    var alertData = "<p><ul><li>" + type + "</li><li>" + value + "</li></ul></p>";
-    var conclusion = "<p>" + redirect + "<a href='" + geoportal + "'>"+ geoportal + "</a></p>";
-
-    var htmlContent =  "<br>" + htmlText + "<br>" + alertData + "<br>" + conclusion;
-
-    var nodemailer = require("nodemailer");
-
-    var transporter = nodemailer.createTransport('smtps://ermesmailer@gmail.com:fp7ermes@smtp.gmail.com');
-
-    var mailOptions = {
-        from: 'ERMES <ermesmailer@gmail.com>', // sender address
-        to: to,
-        subject: subject,
-        html: htmlContent,
-        text: message + " " + redirect + " " + geoportal
-    };
-
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.error('[EMAIL]: '+ JSON.stringify(error));
-            loggers.error.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(error) + '\n');
-        } else {
-            console.log('[EMAIL]: '+ JSON.stringify(info));
-            loggers.info.write('[' + new Date() + ' EMAIL]: '+ JSON.stringify(info) + '\n');
-        }
+    TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alert}).then((html) => {
+        Mailer.sendMail(emails, subject, html);
+    }).catch((err) => {
+        console.error(err);
     });
-
 }

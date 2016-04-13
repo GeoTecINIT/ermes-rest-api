@@ -1,0 +1,21 @@
+<h3>ERMES user "<%= user.username %>" wants to collaborate with you!</h3>
+<br/>
+<p>
+    User <b><%= user.username %></b>, wants to collaborate. Do you want to accept or reject the registration?
+</p>
+<p>
+    Extra info:
+    <ul>
+        <li>Email: <%= user.email %></li>
+    </ul>
+</p>
+<p>
+    To <b>ACCEPT</b>, follow this link: <a href="<%=url.accept%>"><%=url.accept%></a>
+</p>
+<p>
+    To <b>REJECT</b>, follow this link: <a href="<%=url.reject%>"><%=url.reject%></a>
+</p>
+<br/>
+<p>
+    You're the only one who can see this mail.
+</p>
