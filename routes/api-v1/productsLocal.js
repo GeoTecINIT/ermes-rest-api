@@ -66,7 +66,8 @@ module.exports = function() {
                });
            });
         }).then((result) => {
-            buildProduct(res, result, productType, 201);
+            var product = buildProduct(result, productType);
+            res.status(201).json(product);
         }).catch((ex) => {
             console.error('ERROR CREATING PRODUCT: ' + ex);
             res.status(200).json({errors: [{type: ex.name, message: ex.message}]});
@@ -138,7 +139,8 @@ module.exports = function() {
                 throw new Error('Account error');
             }
         }).then((result) => {
-            buildProduct(res, result, product.type, 200);
+            var product = buildProduct(result, product.type);
+            res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(401).json({errors: [{type: ex.name, message: ex.message}]});
@@ -180,7 +182,8 @@ module.exports = function() {
                 }
             });
         }).then((result) => {
-            buildProduct(res, result, product.type, 200);
+            var product = buildProduct(result, product.type);
+            res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(403).json({errors: [{type: ex.name, message: ex.message}]});
@@ -229,14 +232,15 @@ module.exports = function() {
                 }
             });
         }).then((result) => {
-            buildProduct(res, result, product.type, 200);
+            var product = buildProduct(result, product.type);
+            res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
             res.status(403).json({errors: [{type: ex.name, message: ex.message}]});
         });
     });
 
-    function buildProduct(res, result, productType, status) {
+    function buildProduct(result, productType) {
         var product = result[0].get({plain: true});
         var innerProduct = result[1].get({plain: true});
 
@@ -247,7 +251,7 @@ module.exports = function() {
         // Mixed response
         var response = {};
         response[productType] = product;
-        res.status(status).json(response);
+        return response;
     }
 
     return router;

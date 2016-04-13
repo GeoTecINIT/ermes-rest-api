@@ -15,8 +15,8 @@ var defaults = require('../../helpers/config');
 var config = require('../../config/environment');
 var loggers = require('../../initializers/loggers');
 
-var TemplateLoader = require('../utils/template-loader');
-var Mailer = require('../utils/mailer');
+var TemplateLoader = require('../../utils/template-loader');
+var Mailer = require('../../utils/mailer');
 
 const userAttribsToOmit = ['userId', 'password', 'updatedAt', 'createdAt'];
 

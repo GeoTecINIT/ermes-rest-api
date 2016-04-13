@@ -24,6 +24,7 @@ module.exports = function()
                             res.status(200).json({error: false, msg: "User already Accepted."});
                         } else if(token === activation.reject){
                             sendMail(user);
+                            res.status(200).json({error: false, msg: "User rejected."});
                             return activation.destroy({transaction: t});
                         } else if(token === activation.accept) {
                             return user.update({active: true}, {transaction: t}).then(() => {
