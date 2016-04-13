@@ -35,28 +35,9 @@ sequelize.initModels = function(syncParameters) {
     });
   }).then(() => {
     console.log('\t-> DONE Initializing local models');
-
-    return sequelize.sync(syncParameters).then(() => { // Initialize local models
-
-      return new Promise(function (resolve, reject) {
-        console.log('\t* Initializing WARM models...');
-
-        // Read and import WARM models from models dir
-        fs.readdir('./models/warm', (err, files) => {
-
-          files.forEach((file) => {
-            sequelize.import(path.resolve('./models/warm/' + file));
-          });
-          resolve();
-
-        });
-
-      }).then(() => {
-        console.log('\t-> DONE Initializing WARM models');
-      });
-    });
+    return sequelize.sync(syncParameters);
   }).catch((err) => {
-    console.error('\t-> ERROR Initializing models' + err);
+    console.error('\t-> ERROR Initializing local models' + err);
   });
 
 };

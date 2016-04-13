@@ -15,6 +15,15 @@ var environment = {
       pass: 'password'  // Change
     },
     defaultSchema: 'api' // Do not change unless you know what are you doing
+  },
+  WARM: {
+    db: process.env.POSTGRES_DB || 'database', // Change
+    host: 'db_remote_host', // Change
+    port: 5432,
+    auth: {
+      user: 'remote_user', // Change
+      pass: 'remote_password' // Change
+    }
   }
 };
 

@@ -6,6 +6,7 @@ var defaults = require('../../helpers/config');
 var _ = require('underscore');
 _.mixin(require('underscore.inflections'));
 var sequelize = require('../../initializers/db');
+var sequelizeWARM = require('../../initializers/warm');
 
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
@@ -159,7 +160,7 @@ module.exports = function() {
     function findWARMProducts(region, parcelId, attributes, year, doy) {
         doy = parseInt(doy);
         year = parseInt(year);
-        var WARM = sequelize.import(path.resolve('./models/warm/outWARM_' + region));
+        var WARM = sequelizeWARM.import(path.resolve('./models/warm/outWARM_' + region));
 
         return WARM.findAll({attributes: attributes,
             where: {year: year, parcelId: parcelId.toUpperCase(), doy: {$between: [doy, doy+4]}}}).then((products) => {

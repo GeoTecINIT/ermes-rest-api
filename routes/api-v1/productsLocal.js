@@ -262,19 +262,27 @@ module.exports = function() {
 };
 
 function sendProductIfNeeded(product, user) {
-    var subject = "ERMES: " + user.username + " wants to share this observation with you";
+    if (product.product.shared === true) {
+        var subject = "ERMES: " + user.username + " wants to share this observation with you";
 
-    User.findAll({attributes: ['email'], where: {region: user.region, 
-        $and: {enableNotifications: true, $and: {active: true}}}}).then((users) => {
-        
-        var emails = _.without(_.map(users, (user) => user.email), user.email);
-        TemplateLoader.loadTemplate('product', product.type).then((productTemplate) => {
-            return TemplateLoader.compileMailTemplate('product-notification', {parcels: product.parcels,
-                product: product.product, productTemplate, user});
-        }).then((html) => {
-            Mailer.sendMail(emails, subject, html);
-        }).catch((err) => {
-            console.error(err);
+        User.findAll({
+            attributes: ['email'], where: {
+                region: user.region,
+                $and: {enableNotifications: true, $and: {active: true}}
+            }
+        }).then((users) => {
+
+            var emails = _.without(_.map(users, (user) => user.email), user.email);
+            TemplateLoader.loadTemplate('product', product.type).then((productTemplate) => {
+                return TemplateLoader.compileMailTemplate('product-notification', {
+                    parcels: product.parcels,
+                    product: product.product, productTemplate, user
+                });
+            }).then((html) => {
+                Mailer.sendMail(emails, subject, html);
+            }).catch((err) => {
+                console.error(err);
+            });
         });
-    });
+    }
 }

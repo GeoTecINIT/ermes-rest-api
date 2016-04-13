@@ -8,6 +8,7 @@ var express = require("express"),
     os = require('os'),
     loggers = require('./initializers/loggers'),
     sequelize = require('./initializers/db'),
+    sequelizeWARM = require('./initializers/warm'),
     config = require('./config/environment'),
     cors = require('cors'),
     defaultUsers = require('./initializers/defaultUsers');
@@ -32,6 +33,8 @@ app.use(cors());
 
 console.log('\t* Connecting to the DB...');
 module.exports = sequelize.initModels({force: process.env.VOLATILE_DB ? true : false}).then(() => {
+    return sequelizeWARM.initModels();
+}).then(() => {
     "use strict";
 
     // Init guests and admin
