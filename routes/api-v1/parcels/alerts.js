@@ -37,8 +37,17 @@ module.exports = function() {
         var user = req.user;
         var users = req.users;
 
-        var newAlert = _.pick(req.body.alert, ['type', 'value']);
-        newAlert.parcelId = parcel.parcelId;
+        var newAlerts = [];
+        var reqAlerts =req.body.alerts;
+        if (reqAlerts) {
+            reqAlerts.forEach((alert) => {
+                var newAlert = _.pick(alert, ['type', 'value']);
+                newAlert.parcelId = parcel.parcelId;
+               newAlerts.push(newAlert);
+            });
+        }
+        // var newAlert = _.pick(req.body.alert, ['type', 'value']);
+        // newAlert.parcelId = parcel.parcelId;
 
         new Promise((resolve, reject) => {
             if (user.type !== 'admin') {
@@ -48,16 +57,16 @@ module.exports = function() {
             }
         }).then(() => {
             return sequelize.transaction((t) => {
-                return Alert.create(newAlert, {transaction: t}).then((alert) => {
+                return Alert.bulkCreate(newAlerts, {transaction: t}).then(() => {
                     return parcel.update({inDanger: true}, {transaction: t}).then(() => {
-                        return alert;
+                        return newAlerts;
                     });
                 });
             });
-        }).then((alert) => {
+        }).then((alerts) => {
             var userMails = _.pluck(_.filter(users, (user) => user.enableAlerts), 'email');
-            sendMail(userMails, parcel, alert);
-            res.status(201).json({alert: alert});
+            sendMail(userMails, parcel, alerts);
+            res.status(201).json({alerts: alerts});
         }).catch((ex) => {
             console.error('PARCEL NOT FOUND: ' + parcel.parcelId);
             res.status(404).json({errors: [{type: ex.name, message: ex.message}]});
@@ -93,9 +102,9 @@ module.exports = function() {
 
 };
 
-function sendMail(emails, parcel, alert){
+function sendMail(emails, parcel, alerts){
     var subject = "Parcel is in danger [parcelId: " + parcel.parcelId + "]";
-    TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alert}).then((html) => {
+    TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alerts}).then((html) => {
         Mailer.sendMail(emails, subject, html);
     }).catch((err) => {
         console.error(err);

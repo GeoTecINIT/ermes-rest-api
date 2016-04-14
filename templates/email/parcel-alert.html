@@ -1,14 +1,25 @@
-<h3>A new alert has appeared on parcel <%= parcel.parcelId %>.</h3>
+<h3>New alert/s have appeared on parcel <%= parcel.parcelId %>.</h3>
 <br/>
 <p>
-<ul>
-    <li>The danger that triggered the alert was: <%= alert.type%></li>
-    <li>The actual value for this alert is: <%= alert.value%></li>
-</ul>
+<% alerts.forEach((alert, index) => { %>
+<table style="box-shadow: 7px 7px 5px 0 rgba(100,102,97,0.48); border-collapse: collapse">
+    <tr align="left">
+        <th style="background-color: #535353; color: #f5f5f5;"><b>Alert #<%=index+1 %></b></th>
+    </tr>
+    <tr align="left">
+        <td>
+            <ul>
+                <li>The danger that triggered the alert was: <%=alert.type%></li>
+                <li>The actual value for this alert is: <%=alert.value%></li>
+            </ul>
+        </td>
+    </tr>
+</table>
+<% }); %>
 </p>
 <br/>
 <p>
     Please connect to the Geoportal for more info. <a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>
     <br/>
-    Don't want to receive this kind of <b>alerts</b> anymore? You can disable them through you profile settings in the SmartApp.<a href="http://ermes.dlsi.uji.es/prototype/smartapp">http://ermes.dlsi.uji.es/prototype/smartapp</a>
+    Don't want to receive this kind of <b>alerts</b> anymore? You can disable them through your profile settings in the SmartApp.<a href="http://ermes.dlsi.uji.es/prototype/smartapp">http://ermes.dlsi.uji.es/prototype/smartapp</a>
 </p>
