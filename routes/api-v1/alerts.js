@@ -13,74 +13,7 @@ var Mailer = require('../../utils/mailer');
 
 module.exports = function()
 {
-    router.post('/send-pending2', function(req, res) {
-        var user = req.user;
-
-        if(user.type !== 'admin'){
-            res.status(403).json({errors: [{type: 'Forbidden', message: 'You cannot access to this service'}]});
-        }
-        else {
-            var response = {users: []};
-            var yesterday = new Date();
-            yesterday.setDate(yesterday.getDate()-1);
-
-            User.findAll().then((users) => {
-                var eachLazyUser = [];
-                users.forEach((user) => {
-                    var formattedUser = {username: user.username, type: user.type, email: user.email};
-                    var parcelLazyLoad;
-                    if (user.type === 'owner') {
-                        parcelLazyLoad = Parcel.findAll({include: [
-                            {
-                                model: User,
-                                as: 'owners',
-                                where: {userId: user.userId}
-                            }
-                        ], where: {inDanger: true}});
-                    } else if (user.type === 'collaborator') {
-                        parcelLazyLoad = user.getOwners().then((owners) => {
-                            var ownerIds = _.map(owners, (owner) => owner.userId);
-                            return Parcel.findAll({include: [
-                                {
-                                    model: User,
-                                    as: 'owners',
-                                    where: {userId: {$in: ownerIds}}
-                                }
-                            ], where: {inDanger: true}});
-                        });
-                    }
-                    if (parcelLazyLoad) {
-                        eachLazyUser.push(parcelLazyLoad.then((parcels) => {
-                            formattedUser.parcels = [];
-                            var eachLazyParcel = [];
-                            parcels.forEach((parcel) => {
-                                var formattedParcel = {parcelId: parcel.parcelId, inDanger: parcel.inDanger};
-                                eachLazyParcel.push(parcel.getAlerts({where: {createdAt: {$gt: yesterday}}}).then((alerts) => {
-                                    formattedParcel.alerts = alerts;
-                                    if (alerts.length > 0) {
-                                        formattedUser.parcels.push(formattedParcel);
-                                    }
-                                }));
-                            });
-                            return Promise.all(eachLazyParcel).then(() => {
-                                if (formattedUser.parcels.length > 0) {
-                                    response.users.push(formattedUser);
-                                }
-                            });
-                        }));
-                    }
-                });
-                return Promise.all(eachLazyUser);
-            }).then(() => {
-                res.status(200).json(response);
-            }).catch((ex) => {
-                console.error('ERROR FINDING USER: ' + ex);
-                res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
-            });
-        }
-    });
-
-    router.get('/send-pending', function(req, res) {
+    router.post('/send-pending', function(req, res) {
         var user = req.user;
 
         if(user.type !== 'admin'){
