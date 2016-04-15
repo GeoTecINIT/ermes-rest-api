@@ -46,8 +46,6 @@ module.exports = function() {
                newAlerts.push(newAlert);
             });
         }
-        // var newAlert = _.pick(req.body.alert, ['type', 'value']);
-        // newAlert.parcelId = parcel.parcelId;
 
         new Promise((resolve, reject) => {
             if (user.type !== 'admin') {
@@ -103,10 +101,12 @@ module.exports = function() {
 };
 
 function sendMail(emails, parcel, alerts){
-    var subject = "Parcel is in danger [parcelId: " + parcel.parcelId + "]";
-    TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alerts}).then((html) => {
-        Mailer.sendMail(emails, subject, html);
-    }).catch((err) => {
-        console.error(err);
-    });
+    if (alerts.length > 0) {
+        var subject = "Parcel is in danger [parcelId: " + parcel.parcelId + "]";
+        TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alerts}).then((html) => {
+            Mailer.sendMail(emails, subject, html);
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
 }
