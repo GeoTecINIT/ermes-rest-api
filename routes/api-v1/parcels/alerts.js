@@ -7,9 +7,6 @@ _.mixin(require('underscore.inflections'));
 var sequelize = require('../../../initializers/db');
 var Alert = sequelize.import(path.resolve('./models/local/alert'));
 
-var TemplateLoader = require('../../../utils/template-loader');
-var Mailer = require('../../../utils/mailer');
-
 module.exports = function() {
 
     router.get('/', function(req, res) {
@@ -62,8 +59,6 @@ module.exports = function() {
                 });
             });
         }).then((alerts) => {
-            var userMails = _.pluck(_.filter(users, (user) => user.enableAlerts), 'email');
-            sendMail(userMails, parcel, alerts);
             res.status(201).json({alerts: alerts});
         }).catch((ex) => {
             console.error('PARCEL NOT FOUND: ' + parcel.parcelId);
@@ -99,14 +94,3 @@ module.exports = function() {
     return router;
 
 };
-
-function sendMail(emails, parcel, alerts){
-    if (alerts.length > 0) {
-        var subject = "Parcel is in danger [parcelId: " + parcel.parcelId + "]";
-        TemplateLoader.compileMailTemplate('parcel-alert', {parcel, alerts}).then((html) => {
-            Mailer.sendMail(emails, subject, html);
-        }).catch((err) => {
-            console.error(err);
-        });
-    }
-}

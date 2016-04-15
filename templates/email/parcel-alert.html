@@ -1,20 +1,29 @@
-<h3>New alert/s have appeared on parcel <%= parcel.parcelId %>.</h3>
+<h3>New alert/s have appeared on parcel/s <%= parcelIds %>.</h3>
 <br/>
 <p>
-<% alerts.forEach((alert, index) => { %>
-<table style="box-shadow: 7px 7px 5px 0 rgba(100,102,97,0.48); border-collapse: collapse">
-    <tr align="left">
-        <th style="background-color: #535353; color: #f5f5f5;"><b>Alert #<%=index+1 %></b></th>
-    </tr>
-    <tr align="left">
-        <td>
-            <ul>
-                <li>The danger that triggered the alert was: <%=alert.type%></li>
-                <li>The actual value for this alert is: <%=alert.value%></li>
-            </ul>
-        </td>
-    </tr>
-</table>
+    <% parcels.forEach((parcel) => { %>
+    <table style="box-shadow: 7px 7px 5px 0 rgba(100,102,97,0.48); border-collapse: collapse">
+        <tr align="left">
+            <th style="background-color: #FFD557; color: #535353;"><b>Parcel #<%=parcel.parcelId%></b></th>
+        </tr>
+        <tr align="left">
+            <% parcel.alerts.forEach((alert, index) => { %>
+            <table style="box-shadow: 7px 7px 5px 0 rgba(100,102,97,0.48); border-collapse: collapse">
+                <tr align="left">
+                    <th style="background-color: #535353; color: #f5f5f5;"><b>Alert #<%=index+1 %></b></th>
+                </tr>
+                <tr align="left">
+                    <td>
+                        <ul>
+                            <li>The danger that triggered the alert was: <%=alert.type%></li>
+                            <li>The actual value for this alert is: <%=alert.value%></li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+            <% }); %>
+        </tr>
+    </table>
 <% }); %>
 </p>
 <br/>

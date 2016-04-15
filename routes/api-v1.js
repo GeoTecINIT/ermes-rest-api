@@ -19,5 +19,8 @@ module.exports = function(passport) {
     var customOptions = require('./api-v1/customOptions');
     router.use('/customOptions', passport.authenticate('login', {session: false}), customOptions());
 
+    var alerts = require('./api-v1/alerts');
+    router.use('/alerts', passport.authenticate('login', {session: false}), alerts());
+
     return router;
 };
