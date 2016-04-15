@@ -8,7 +8,8 @@ function sendMail(bcc, subject, body){
       from: 'ERMES <ermesmailer@gmail.com>', // sender address
       bcc,
       subject,
-      html: body
+      html: body,
+      generateTextFromHtml: true
     };
 
     transporter.sendMail(mailOptions, function(error, info){
