@@ -13,7 +13,7 @@ var Mailer = require('../../utils/mailer');
 
 module.exports = function()
 {
-    router.get('/send-pending2', function(req, res) {
+    router.post('/send-pending2', function(req, res) {
         var user = req.user;
 
         if(user.type !== 'admin'){

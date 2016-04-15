@@ -11,7 +11,9 @@ function init() {
         {username: 'guestlg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'local', type: 'guest', email: 'guestlg@ermes.com', language: 'el', active: true},
         {username: 'guestrs', password: 'q1w2e3r4t5y6', region: 'spain', profile: 'regional', type: 'guest', email: 'guestrs@ermes.com', language: 'es', active: true},
         {username: 'guestri', password: 'q1w2e3r4t5y6', region: 'italy', profile: 'regional', type: 'guest', email: 'guestri@ermes.com', language: 'it', active: true},
-        {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el', active: true}
+        {username: 'guestrg', password: 'q1w2e3r4t5y6', region: 'greece', profile: 'regional', type: 'guest', email: 'guestrg@ermes.com', language: 'el', active: true},
+        {username: 'guestrgamb', password: 'q1w2e3r4t5y6', region: 'gambia', profile: 'regional', type: 'guest', email: 'guestrgamb@ermes.com', language: 'en', active: true},
+        {username: 'guestrgsrv', password: 'q1w2e3r4t5y6', region: 'gambia-srv', profile: 'regional', type: 'guest', email: 'guestrgsrv@ermes.com', language: 'en', active: true}
       ]);
     }
   });

@@ -193,7 +193,9 @@ function calculateLanguage(region){
     var regions = {
         'italy': 'it',
         'spain': 'es',
-        'greece': 'el'
+        'greece': 'el',
+        'gambia': 'en',
+        'gambia-srv': 'en'
     };
 
     if(!regions[region]) {
