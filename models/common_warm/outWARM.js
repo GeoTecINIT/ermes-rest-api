@@ -35,7 +35,7 @@ module.exports = function(sequelize, Sequelize) {
     stBreakvisc: {type: Sequelize.REAL, field: 'st_breakvisc'},
     grainLipid: {type: Sequelize.REAL, field: 'grain_lipid'},
     disSeverity: {type: Sequelize.REAL, field: 'dis_severity'},
-    infections: {type: Sequelize.REAL, field: 'infections'},
+    infections: {type: Sequelize.REAL, field: 'pot_infections'},
     cumInfections: {type: Sequelize.REAL, field: 'cum_infections'},
     disYieldRed: {type: Sequelize.REAL, field: 'dis_yield_red'},
     disgroundBiomassRed: {type: Sequelize.REAL, field: 'disground_biomass_red'},
