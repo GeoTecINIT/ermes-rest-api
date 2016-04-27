@@ -155,7 +155,7 @@ module.exports = function() {
         var WARM = sequelizeWARM.import(path.resolve('./models/warm/outWARM_' + region));
 
         return WARM.findAll({attributes: attributes,
-            where: {year: year, parcelId: parcelId.toUpperCase(), doy: {$between: [doy, doy+4]}}}).then((products) => {
+            where: {year: year, parcelId: parcelId.toUpperCase()/*, doy: {$between: [doy, doy+4]}*/}}).then((products) => {
 
             if (products.length !== 0 && products.length < 5) { // If end of year is close
                 var remaining = 5 - products.length;
