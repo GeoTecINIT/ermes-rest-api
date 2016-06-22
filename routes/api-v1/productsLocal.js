@@ -186,7 +186,7 @@ module.exports = function() {
                 }
             });
         }).then((result) => {
-            var product = buildProduct(result, product.type);
+            var product = buildProduct(result, result[0].type);
             res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);

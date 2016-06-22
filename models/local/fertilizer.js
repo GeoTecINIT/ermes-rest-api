@@ -10,7 +10,7 @@ module.exports = function(sequelize, Sequelize) {
     name: {type: Sequelize.STRING, allowNull: false},
     quantity: {type: Sequelize.FLOAT, allowNull: false},
     nitrogenContent: Sequelize.FLOAT, // Nullable
-    phosphorousContent: Sequelize.FLOAT, // Nullable
+    phosphorusContent: Sequelize.FLOAT, // Nullable
     potassiumContent: Sequelize.FLOAT, // Nullable
     observationDate: {type: Sequelize.DATE, allowNull: false}
   });
