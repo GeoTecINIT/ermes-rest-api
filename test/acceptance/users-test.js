@@ -10,7 +10,7 @@ describe('User services', function() {
   beforeEach(function() {
     "use strict";
 
-    return require('require-reload')('../../server').then((serverInstance) => {
+    return require('require-reload')('../../main').then((serverInstance) => {
       server = serverInstance;
     });
   });
