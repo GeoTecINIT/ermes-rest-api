@@ -12,7 +12,6 @@ if (cluster.isMaster) {
 
     cluster.on('exit', (worker, code, signal) => {
        console.log(` [x] Worker ${worker.process.pid} died, starting a new instance`);
-       cluster.fork();
     });
 } else {
     require('./main').then(() => {
