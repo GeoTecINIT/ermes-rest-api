@@ -1,0 +1,13 @@
+<p>
+    Dear ERMES user,
+</p>
+<p>
+    According to our simulations, some of your parcels are reaching the optimal period for the second Nitrogen fertilization. You can check the parcels approaching the optimal fertilization period using the ERMES local geoportal (<a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>)
+</p>
+<br/>
+<h3><b><u>Here follows the list of parcels with active fertilization alerts:</u></b></h3>
+<p>
+    <% parcels.forEach((parcel) => { %>
+        <%=parcel%><br>
+    <% }); %>
+</p>

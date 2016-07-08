@@ -1,0 +1,13 @@
+<p>
+    Estimado usuario de ERMES,
+</p>
+<p>
+    Según nuestras simulaciones, tenemos una recomendación de periodo óptimo para la segunda fertilización nitrogenada para alguna de sus parcelas! Puede comprobar las parcelas con alertas activas para fertilización en el geoportal local de ERMES. (<a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>)
+</p>
+<br/>
+<h3><b><u>Aquí tiene la lista de las parcelas con alertas activas para fertilización:</u></b></h3>
+<p>
+    <% parcels.forEach((parcel) => { %>
+        <%=parcel%><br>
+    <% }); %>
+</p>

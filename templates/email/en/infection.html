@@ -1,0 +1,13 @@
+<p>
+    Dear ERMES user,
+</p>
+<p>
+    According to our simulations, a new alert for possible Rice Blast infection risk in the coming period has appeared on one some of your parcels!  You can check the parcels with active alerts in the ERMES local geoportal. (<a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>)
+</p>
+<br/>
+<h3><b><u>Here follows the list of parcels with active alerts:</u></b></h3>
+<p>
+    <% parcels.forEach((parcel) => { %>
+        <%=parcel%><br>
+    <% }); %>
+</p>

@@ -1,0 +1,13 @@
+<p>
+    Caro Utente ERMES,
+</p>
+<p>
+    In base alle nostre simulazioni, una o più delle tue parcelle sta raggiungendo il periodo ottimale per la seconda fertilizzazione azotata. Puoi visualizzare le parcelle con allerte attive nel geoportale locale di ERMES (<a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>)
+</p>
+<br/>
+<h3><b><u>Questa è la lista delle parcelle con allerte attive:</u></b></h3>
+<p>
+    <% parcels.forEach((parcel) => { %>
+        <%=parcel%><br>
+    <% }); %>
+</p>

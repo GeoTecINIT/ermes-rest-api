@@ -23,7 +23,7 @@ module.exports = function()
             var yesterday = new Date();
             yesterday.setDate(yesterday.getDate()-0.8);
 
-            User.findAll({attributes: ['email'], include: [
+            User.findAll({attributes: ['email', 'language'], include: [
                 {
                     model: User,
                     as: 'collaborators',
@@ -60,18 +60,80 @@ module.exports = function()
 
 function sendMail(owners){
     owners.forEach((owner) => {
+        var lang = owner.language;
+
+        var parcelAlerts = {
+            FIRST_FERTILIZATION: new Set(),
+            SECOND_FERTILIZATION: new Set(),
+            INFECTION: new Set()
+        };
+        
+        owner.parcels.forEach((parcel) => {
+            parcel.alerts.forEach((alert) => {
+                if (alert.type === 'Stagecode Alert') {
+                    if (alert.value >= 1.2 && alert.value <= 1.5) {
+                        parcelAlerts.FIRST_FERTILIZATION.add(parcel.parcelId);
+                    } else if (alert.value >= 2.3 && alert.value <= 2.5) {
+                        parcelAlerts.SECOND_FERTILIZATION.add(parcel.parcelId);
+                    }
+                } else if (alert.type === 'Infection Risk Alert') {
+                    parcelAlerts.INFECTION.add(parcel.parcelId);
+                }
+            });
+        });
+        
         var emails = [owner.email];
         owner.collaborators.forEach((collaborator) => {
            emails.push(collaborator.email);
         });
 
-        var parcelIds = _.pluck(owner.parcels, 'parcelId');
+        if (parcelAlerts.FIRST_FERTILIZATION.size > 0) {
+            TemplateLoader.compileMailTemplate(lang +'/first-fertilization', {parcels: parcelAlerts.FIRST_FERTILIZATION}).then((html) => {
+                var subject = subjects.FIRST_FERTILIZATION[lang];
+                Mailer.sendMail(emails, subject, html);
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
 
-        var subject = "Parcel/s are in danger [parcelId: " + parcelIds + "]";
-        TemplateLoader.compileMailTemplate('parcel-alert', {parcels: owner.parcels, parcelIds}).then((html) => {
-            Mailer.sendMail(emails, subject, html);
-        }).catch((err) => {
-            console.error(err);
-        });
+        if (parcelAlerts.SECOND_FERTILIZATION.size > 0) {
+            TemplateLoader.compileMailTemplate(lang +'/second-fertilization', {parcels: parcelAlerts.SECOND_FERTILIZATION}).then((html) => {
+                var subject = subjects.SECOND_FERTILIZATION[lang];
+                Mailer.sendMail(emails, subject, html);
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
+
+        if (parcelAlerts.INFECTION.size > 0) {
+            TemplateLoader.compileMailTemplate(lang +'/infection', {parcels: parcelAlerts.INFECTION}).then((html) => {
+                var subject = subjects.INFECTION[lang];
+                Mailer.sendMail(emails, subject, html);
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
+
     });
 }
+
+var subjects = {
+    FIRST_FERTILIZATION: {
+        en: "[ERMES] Optimal period for first nitrogen fertilization approaching",
+        el: "[ERMES] Πλησιάζει η βέλτιστη περίοδος για την πρώτη επιφανειακή λίπανση",
+        es: "[ERMES] Recomendación de periodo óptimo para la primera fertilización nitrogenada",
+        it: "[ERMES] Il periodo ottimale per la prima fertilizzazione si sta avvicinando"
+    },
+    SECOND_FERTILIZATION: {
+        en: "[ERMES] Optimal period for second nitrogen fertilization approaching",
+        el: "[ERMES] Πλησιάζει η βέλτιστη περίοδος για τη δεύτερη επιφανειακή λίπανση",
+        es: "[ERMES] Recomendación de periodo óptimo para la segunda fertilización",
+        it: "[ERMES] Il periodo ottimale per la seconda fertilizzazione si sta avvicinando"
+    },
+    INFECTION: {
+        en: "[ERMES] Possible period of high Rice Blast Infection Risk",
+        el: "[ERMES] Πιθανή περίοδος υψηλή επικινδυνότητας για εμφάνιση Πυρικουλάριας",
+        es: "[ERMES] Posible período de alto riesgo de infección de pedicularia",
+        it: "[ERMES] Possibile periodi di elevato rishchio di infezione da Brusone rilevato"
+    }
+};

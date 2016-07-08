@@ -1,0 +1,13 @@
+<p>
+    Caro Utente ERMES,
+</p>
+<p>
+    In base alle nostre simulazioni, una nuova allerta per un possibile elevato rischio di infezione per I prossimi giorni é stata rilevata per una o più delle tue parcelle. Puoi visualizzare le parcelle con allerte attive nel geoportale locale di ERMES(<a href="http://ermes.dlsi.uji.es/prototype/geoportal">http://ermes.dlsi.uji.es/prototype/geoportal</a>)
+</p>
+<br/>
+<h3><b><u>Questa è la lista delle parcelle con allerte attive:</u></b></h3>
+<p>
+    <% parcels.forEach((parcel) => { %>
+        <%=parcel%><br>
+    <% }); %>
+</p>
