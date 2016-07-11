@@ -17,10 +17,13 @@ module.exports = function() {
         new Promise((resolve, reject) => {
             var userIds = _.pluck(users, 'userId');
             if (!_.contains(userIds, user.userId)) {
-                reject(new Error('You are not allowed to access this parcel'));
-            } else {
-                resolve(parcel.get({plain: true}).alerts);
+                return reject(new Error('You are not allowed to access this parcel'));
             }
+            return resolve();
+        }).then(() => {
+            return getUserAlerts(user);
+        }).then((userIds) => {
+            return Alert.findAll({where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}}});
         }).then((alerts) => {
             res.status(200).json({alerts: alerts});
         }).catch((ex) => {
@@ -38,7 +41,7 @@ module.exports = function() {
         var reqAlerts =req.body.alerts;
         if (reqAlerts) {
             reqAlerts.forEach((alert) => {
-                var newAlert = _.pick(alert, ['type', 'value']);
+                var newAlert = _.pick(alert, ['type', 'value', 'userId']);
                 newAlert.parcelId = parcel.parcelId;
                newAlerts.push(newAlert);
             });
@@ -53,9 +56,9 @@ module.exports = function() {
         }).then(() => {
             return sequelize.transaction((t) => {
                 return Alert.bulkCreate(newAlerts, {transaction: t}).then(() => {
-                    return parcel.update({inDanger: true}, {transaction: t}).then(() => {
-                        return newAlerts;
-                    });
+                    // return parcel.update({inDanger: true}, {transaction: t}).then(() => {
+                    return newAlerts;
+                    // });
                 });
             });
         }).then((alerts) => {
@@ -76,12 +79,18 @@ module.exports = function() {
             if (!_.contains(userIds, user.userId)) {
                 throw new Error('You are not allowed to access this parcel');
             }
-
-            var response = parcel.get({plain: true}).alerts;
-            return Alert.destroy({where: {parcelId: parcel.parcelId}, transaction: t}).then(() => {
-                return parcel.update({inDanger: false}, {transaction: t});
-            }).then(() => {
-                return response;
+            return getUserAlerts(user, t).then((userIds) => {
+                return Alert.findAll(
+                    {where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}}}, 
+                    {transaction: t}
+                ).then((alerts) => {
+                    return Alert.destroy({
+                        where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}},
+                        transaction: t
+                    }).then(() => {
+                        return alerts;
+                    });
+                });
             });
         }).then((alerts) => {
             res.status(200).json({alerts: alerts});
@@ -94,3 +103,15 @@ module.exports = function() {
     return router;
 
 };
+
+function getUserAlerts(user, transaction) {
+    return new Promise((resolve, reject) => {
+        if (user.type === 'collaborator') {
+            user.getOwners({transaction}).then((owners) => {
+                resolve(owners.map((owner) => owner.userId));
+            });
+        } else {
+            resolve([user.userId]);
+        }
+    });
+}

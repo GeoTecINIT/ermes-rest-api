@@ -8,6 +8,7 @@ var sequelize = require('../../initializers/db');
 
 var Parcel = sequelize.import(path.resolve('./models/local/parcel'));
 var User = sequelize.import(path.resolve('./models/local/user'));
+var Alert = sequelize.import(path.resolve('./models/local/alert'));
 var ActivationToken = sequelize.import(path.resolve('./models/local/activationToken'));
 
 var administrators = require('../../user-config-files/administratorsInfo.json');
@@ -120,6 +121,11 @@ module.exports = function(passport)
                              model: User,
                              as: 'owners',
                              where: {userId: {$in: ownerIds}}
+                         },
+                         {
+                             model: Alert,
+                             as: 'alerts',
+                             where: {userId: {$in: ownerIds}}
                          }
                      ]}).then((parcels) => {
                          plainUser.parcels =  _.map(parcels, (parcel) => parcel.parcelId);
@@ -127,7 +133,11 @@ module.exports = function(passport)
                          if (withParcels === 'true') {
                              var responseParcels = [];
                              parcels.forEach((parcel) => {
-                                 responseParcels.push(_.pick(parcel, ['parcelId', 'inDanger']));
+                                 var reducedParcel = _.pick(parcel, ['parcelId']);
+                                 if (parcel.alerts.length > 0) {
+                                     reducedParcel.inDanger = true;
+                                 }
+                                 responseParcels.push(reducedParcel);
                              });
                              response.parcels = responseParcels;
                          }

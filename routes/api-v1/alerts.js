@@ -30,15 +30,14 @@ module.exports = function()
                     attributes: ['email']
                 },
                 {
-                    model: Parcel,
-                    as: 'parcels',
-                    where: {inDanger: true},
-                    attributes: ['parcelId'],
+                    model: Alert,
+                    as: 'alerts',
+                    where: {createdAt: {$gt: yesterday}},
                     include: [
                         {
-                            model: Alert,
-                            as: 'alerts',
-                            where: {createdAt: { $gt: yesterday}}
+                            model: Parcel,
+                            as: 'parcel',
+                            attributes: ['parcelId']
                         }
                     ]
                 }
@@ -68,18 +67,16 @@ function sendMail(owners){
             INFECTION: new Set()
         };
         
-        owner.parcels.forEach((parcel) => {
-            parcel.alerts.forEach((alert) => {
-                if (alert.type === 'Stagecode Alert') {
-                    if (alert.value >= 1.2 && alert.value <= 1.5) {
-                        parcelAlerts.FIRST_FERTILIZATION.add(parcel.parcelId);
-                    } else if (alert.value >= 2.3 && alert.value <= 2.5) {
-                        parcelAlerts.SECOND_FERTILIZATION.add(parcel.parcelId);
-                    }
-                } else if (alert.type === 'Infection Risk Alert') {
-                    parcelAlerts.INFECTION.add(parcel.parcelId);
+        owner.alerts.forEach((alert) => {
+            if (alert.type === 'Stagecode Alert') {
+                if (alert.value >= 1.2 && alert.value <= 1.5) {
+                    parcelAlerts.FIRST_FERTILIZATION.add(alert.parcelId);
+                } else if (alert.value >= 2.3 && alert.value <= 2.5) {
+                    parcelAlerts.SECOND_FERTILIZATION.add(alert.parcelId);
                 }
-            });
+            } else if (alert.type === 'Infection Risk Alert') {
+                parcelAlerts.INFECTION.add(alert.parcelId);
+            }
         });
         
         var emails = [owner.email];
