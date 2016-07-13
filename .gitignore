@@ -40,3 +40,6 @@ config/environment.js
 
 #Image files
 images/*
+
+#Mac filesystem
+.DS_Store
