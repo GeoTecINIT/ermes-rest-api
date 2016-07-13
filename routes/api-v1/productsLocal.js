@@ -143,7 +143,7 @@ module.exports = function() {
                 throw new Error('Account error');
             }
         }).then((result) => {
-            var product = buildProduct(result, product.type);
+            var product = buildProduct(result, result[0].type);
             res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
@@ -197,6 +197,7 @@ module.exports = function() {
     router.delete('/:productType/:id', function(req, res) {
         var user = req.user;
         var product = req.product;
+        var options = req.body;
 
         sequelize.transaction((t) => {
             return new Promise((resolve, reject) => {
@@ -213,30 +214,32 @@ module.exports = function() {
                 if (!_.contains(allowedUsers, product.userId)) { // Add admin permission here
                     throw new Error('You do not have permission to manage this product');
                 } else {
-                    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
-                        var productPlain = product.get({plain: true});
-                        var innerProductPlain = innerProduct.get({plain: true});
+                    if (options.parcelId) {
+                        return product.getParcels({transaction: t}).then((parcels) => {
+                            if (parcels.length > 1) {
 
-                        // Combine both general and specific product
-                        _.extend(productPlain, innerProductPlain);
-                        productPlain = _.omit(productPlain, ommitedProductFields);
+                                return Parcel.findOne({where: {parcelId: options.parcelId}}, {transaction: t}).then((parcel) => {
+                                    return product.removeParcel(parcel)
+                                }).then(() => getInnerProduct(product, t)).then((innerProduct) => {
+                                    return [product, innerProduct];
+                                });
+                            }
 
-                        // Mixed response
-                        var response = {};
-                        response[product.type] = productPlain;
-
-                        // Remove from the system
-
-                        return innerProduct.destroy({transaction: t}).then(() => {
-                            return product.destroy({transaction: t}).then(() => {
-                                return [product, innerProduct];
+                            return getInnerProduct(product, t).then((innerProduct) => {
+                                // Remove from the system
+                                return deleteProduct(innerProduct, t, product);
                             });
                         });
+                    }
+
+                    return getInnerProduct(product, t).then((innerProduct) => {
+                        // Remove from the system
+                        return deleteProduct(innerProduct, t, product);
                     });
                 }
             });
         }).then((result) => {
-            var product = buildProduct(result, product.type);
+            var product = buildProduct(result, result[0].type);
             res.status(200).json(product);
         }).catch((ex) => {
             console.error('FORBIDDEN: ' + product.type + ' ' + product.productId);
@@ -260,6 +263,31 @@ module.exports = function() {
 
     return router;
 };
+
+function getInnerProduct(product, t) {
+    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
+        var productPlain = product.get({plain: true});
+        var innerProductPlain = innerProduct.get({plain: true});
+
+        // Combine both general and specific product
+        _.extend(productPlain, innerProductPlain);
+        productPlain = _.omit(productPlain, ommitedProductFields);
+
+        // Mixed response
+        var response = {};
+        response[product.type] = productPlain;
+
+        return innerProduct;
+    });
+}
+
+function deleteProduct(innerProduct, t, product) {
+    return innerProduct.destroy({transaction: t}).then(() => {
+        return product.destroy({transaction: t}).then(() => {
+            return [product, innerProduct];
+        });
+    });
+}
 
 function sendProductIfNeeded(product, user) {
     if (product.product.shared === true) {
