@@ -81,8 +81,7 @@ module.exports = function() {
             }
             return getUserAlerts(user, t).then((userIds) => {
                 return Alert.findAll(
-                    {where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}}}, 
-                    {transaction: t}
+                    {where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}}, transaction: t}
                 ).then((alerts) => {
                     return Alert.destroy({
                         where: {parcelId: parcel.parcelId, $and: {userId: {$in: userIds}}},

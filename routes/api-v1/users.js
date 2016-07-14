@@ -102,7 +102,9 @@ module.exports = function(passport)
             var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
             if (user.type === 'owner') {
                 var ownerIds = [user.userId];
-                return getParcelForUser(ownerIds, plainUser, withParcels);
+                return getParcelForUser(ownerIds, plainUser, withParcels).then((response) => {
+                    res.status(200).json(response);
+                });
             } else if (user.type === 'collaborator') {
                  return user.getOwners().then((owners) => {
                      var ownerIds = _.map(owners, (owner) => owner.userId);
