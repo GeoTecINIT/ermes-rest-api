@@ -101,48 +101,12 @@ module.exports = function(passport)
         else {
             var plainUser = _.omit(user.get({plain: true}), userAttribsToOmit);
             if (user.type === 'owner') {
-              user.getParcels().then((parcels) => {
-                  plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
-                  var response = {user: plainUser};
-                  if (withParcels === 'true') {
-                      var responseParcels = [];
-                      parcels.forEach((parcel) => {
-                          responseParcels.push(_.pick(parcel, ['parcelId', 'inDanger']));
-                      });
-                      response.parcels = responseParcels;
-                  }
-                  res.status(200).json(response);
-              });
+                var ownerIds = [user.userId];
+                return getParcelForUser(ownerIds, plainUser, withParcels);
             } else if (user.type === 'collaborator') {
                  return user.getOwners().then((owners) => {
                      var ownerIds = _.map(owners, (owner) => owner.userId);
-                     return Parcel.findAll({include: [
-                         {
-                             model: User,
-                             as: 'owners',
-                             where: {userId: {$in: ownerIds}}
-                         },
-                         {
-                             model: Alert,
-                             as: 'alerts',
-                             where: {userId: {$in: ownerIds}}
-                         }
-                     ]}).then((parcels) => {
-                         plainUser.parcels =  _.map(parcels, (parcel) => parcel.parcelId);
-                         var response = {user: plainUser};
-                         if (withParcels === 'true') {
-                             var responseParcels = [];
-                             parcels.forEach((parcel) => {
-                                 var reducedParcel = _.pick(parcel, ['parcelId']);
-                                 if (parcel.alerts.length > 0) {
-                                     reducedParcel.inDanger = true;
-                                 }
-                                 responseParcels.push(reducedParcel);
-                             });
-                             response.parcels = responseParcels;
-                         }
-                         return response;
-                     });
+                     return getParcelForUser(ownerIds, plainUser, withParcels);
                  }).then((response) => {
                       res.status(200).json(response);
                  }).catch((ex) => {
@@ -197,6 +161,53 @@ module.exports = function(passport)
     return router;
 
 };
+
+function getParcelForUser(ownerIds, plainUser, withParcels) {
+    return Promise.all([
+        Parcel.findAll({
+            attributes: ['parcelId'],
+            include: [
+                {
+                    model: User,
+                    as: 'owners',
+                    where: {userId: {$in: ownerIds}}
+                }
+            ]
+        }),
+        Parcel.findAll({
+            attributes: ['parcelId'],
+            include: [
+                {
+                    model: User,
+                    as: 'owners',
+                    where: {userId: {$in: ownerIds}}
+                },
+                {
+                    model: Alert,
+                    as: 'alerts',
+                    where: {userId: {$in: ownerIds}}
+                }
+            ]
+        })
+    ]).then(([parcels, parcelsInDanger]) => {
+        plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
+        var response = {user: plainUser};
+        if (withParcels === 'true') {
+            var responseParcels = [];
+            parcels.forEach((parcel) => {
+                var parcelId = parcel.parcelId;
+                var inDanger = _.find(parcelsInDanger, (parcelInDanger) => parcelInDanger.parcelId === parcelId) !== undefined;
+
+                responseParcels.push({
+                    parcelId,
+                    inDanger
+                });
+            });
+            response.parcels = responseParcels;
+        }
+        return response;
+    });
+}
 
 // Calculates the language for a determinate region
 function calculateLanguage(region){
