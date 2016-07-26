@@ -79,7 +79,7 @@ function sendMail(owners){
             }
         });
         
-        var emails = [owner.email];
+        var emails = [owner.email, "busetto.l@irea.cnr.it", "sven.casteleyn@uji.es"];
         owner.collaborators.forEach((collaborator) => {
            emails.push(collaborator.email);
         });
