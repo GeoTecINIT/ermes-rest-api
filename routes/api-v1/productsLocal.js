@@ -63,6 +63,8 @@ module.exports = function() {
                               return [product, innerProduct];
                           });
                       });
+                  } else if (user.type === 'guest') {
+                      return [product, innerProduct];
                   } else { // Future admin or guest things, add here
                       throw new Error('Account error');
                   }
