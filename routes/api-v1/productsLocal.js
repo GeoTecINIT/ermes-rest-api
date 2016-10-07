@@ -21,9 +21,8 @@ module.exports = function() {
     // Check if we are offering the product that the client is looking for
     router.use('/:productType', function(req, res, next) {
         var productType = req.params.productType;
-        if (productType === 'observations' || // All allowed to access observations
+        if (_.contains(defaults.allGuestProducts, productType) || // All allowed to access observations
             req.user.type !== 'guest' && _.contains(defaults.allLocalProducts, productType)) { // Guest access denied
-
             next();
         } else {
             res.type('text/plain');

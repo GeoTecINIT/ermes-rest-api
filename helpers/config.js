@@ -51,5 +51,8 @@ module.exports = {
         {name: "abioticRisks", column: "coldSter"},
         {name: "developmentStages", column: "stagecode"},
         {name: "infectionRisks", column: "infections"}
+    ],
+    allGuestProducts: [
+        "observations"
     ]
 };
