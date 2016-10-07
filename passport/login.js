@@ -7,12 +7,17 @@ var sequelize = require('../initializers/db');
 
 var User = sequelize.import(path.resolve('./models/local/user'));
 
+// var validUsers = new Map();
 
 module.exports = function(passport) {
     // Here is defined the login strategy.
     passport.use('login', new CustomBearerStrategy({
       headerName: 'authorization'
     }, function (token, done) {
+
+        /*if (validUsers.has(token)) {
+            return done(null, validUsers.get(token), {});
+        }*/
 
         // HTTP Basic Auth
         var apiKey = new Buffer(token, 'base64').toString('ascii').split(':');
@@ -41,6 +46,7 @@ module.exports = function(passport) {
             }
 
             //All works fine.
+            // validUsers.set(token, user);
             return done(null, user, {});
         }).catch((err) => {
           return done(err, false, {});

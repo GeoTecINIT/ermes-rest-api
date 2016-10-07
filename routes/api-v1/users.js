@@ -123,8 +123,11 @@ module.exports = function(passport)
 
     router.put('/:username', passport.authenticate('login', {session: false}), function(req, res){
         var user = req.user;
-        if(user.username !== req.params.username){
+        if (user.username !== req.params.username) {
             res.status(403).json({err: true, content: {name: 'Forbidden', msg: 'You cannot access to this profile'}});
+        }
+        else if (user.type === 'guest') {
+            res.status(403).json({err: true, content: {name: 'Forbidden', msg: 'Guest users cannot be modified'}})
         }
         else {
             var attributesToChange = _.pick(req.body.user,
