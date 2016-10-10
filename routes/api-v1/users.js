@@ -131,7 +131,7 @@ module.exports = function(passport)
         }
         else {
             var attributesToChange = _.pick(req.body.user,
-              ['password', 'oldPassword', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
+              ['name', 'surname', 'password', 'oldPassword', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
             );
 
             sequelize.transaction((t) => {
