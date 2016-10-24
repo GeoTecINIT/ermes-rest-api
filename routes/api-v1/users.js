@@ -106,15 +106,15 @@ module.exports = function(passport)
                     res.status(200).json(response);
                 });
             } else if (user.type === 'collaborator') {
-                 return user.getOwners().then((owners) => {
-                     var ownerIds = _.map(owners, (owner) => owner.userId);
-                     return getParcelForUser(ownerIds, plainUser, withParcels);
-                 }).then((response) => {
-                      res.status(200).json(response);
-                 }).catch((ex) => {
-                      console.error('ERROR FINDING USER: ' + ex);
-                      res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
-                 });
+                return user.getOwners().then((owners) => {
+                    var ownerIds = _.map(owners, (owner) => owner.userId);
+                    return getParcelForUser(ownerIds, plainUser, withParcels);
+                }).then((response) => {
+                     res.status(200).json(response);
+                }).catch((ex) => {
+                     console.error('ERROR FINDING USER: ' + ex);
+                     res.status(404).json(({errors: [{type: ex.name, message: ex.message}]}));
+                });
             } else { // Guest by default
                 res.status(200).json({user: plainUser});
             }
@@ -131,7 +131,7 @@ module.exports = function(passport)
         }
         else {
             var attributesToChange = _.pick(req.body.user,
-              ['name', 'surname', 'password', 'oldPassword', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
+              ['password', 'oldPassword', 'email', 'profile', 'type', 'language', 'enableAlerts', 'enableNotifications', 'lastLongitude', 'lastLatitude', 'zoomLevel', 'spatialReference']
             );
 
             sequelize.transaction((t) => {
@@ -194,7 +194,9 @@ function getParcelForUser(ownerIds, plainUser, withParcels) {
                 }
             ]
         })
-    ]).then(([parcels, parcelsInDanger]) => {
+    ]).then((result) => {
+        var parcels = result[0];
+        var parcelsInDanger = result[1];
         plainUser.parcels = _.map(parcels, (parcel) => parcel.parcelId);
         var response = {user: plainUser};
         if (withParcels === 'true') {

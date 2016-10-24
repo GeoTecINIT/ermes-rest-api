@@ -39,34 +39,34 @@ module.exports = function() {
         var ProductType = sequelize.import(path.resolve('./models/local/' + _.singularize(req.params.productType)));
 
         sequelize.transaction((t) => {
-           var outterProductProperties = _.pick(receivedProduct, ['uploadDate', 'shared']);
-           outterProductProperties.type = productType; // For searching purposes
-           outterProductProperties.userId = user.userId; // Faster than doing an UPDATE query later with setUser
-           var innerProductProperties = _.omit(receivedProduct, ['uploadDate', 'shared']);
+            var outterProductProperties = _.pick(receivedProduct, ['uploadDate', 'shared']);
+            outterProductProperties.type = productType; // For searching purposes
+            outterProductProperties.userId = user.userId; // Faster than doing an UPDATE query later with setUser
+            var innerProductProperties = _.omit(receivedProduct, ['uploadDate', 'shared']);
 
             return Product.create(outterProductProperties, {transaction: t}).then((product) => { // Create general
-               innerProductProperties.productId = product.productId; // Link specific with general
+                innerProductProperties.productId = product.productId; // Link specific with general
 
-               return ProductType.create(innerProductProperties, {transaction: t}).then((innerProduct) => { // Create specific
-                  if (user.type === 'owner') {
-                      var usersIds = [user.userId];
+                return ProductType.create(innerProductProperties, {transaction: t}).then((innerProduct) => { // Create specific
+                    if (user.type === 'owner') {
+                        var usersIds = [user.userId];
 
-                      return checkAndAddProductToParcel(parcelIds, usersIds, product, t).then(() => {
-                          return [product, innerProduct];
-                      });
-                  } else if (user.type === 'collaborator') {
-                      return user.getOwners({transaction: t}).then((owners) => {
-                          var usersIds = _.map(owners, (owner) => owner.userId);
+                        return checkAndAddProductToParcel(parcelIds, usersIds, product, t).then(() => {
+                            return [product, innerProduct];
+                        });
+                    } else if (user.type === 'collaborator') {
+                        return user.getOwners({transaction: t}).then((owners) => {
+                            var usersIds = _.map(owners, (owner) => owner.userId);
 
-                          return checkAndAddProductToParcel(parcelIds, usersIds, product, t).then(() => {
-                              return [product, innerProduct];
-                          });
-                      });
-                  } else if (user.type === 'guest') {
-                      return [product, innerProduct];
-                  } else { // Future admin or guest things, add here
-                      throw new Error('Account error');
-                  }
+                              return checkAndAddProductToParcel(parcelIds, usersIds, product, t).then(() => {
+                                  return [product, innerProduct];
+                              });
+                        });
+                    } else if (user.type === 'guest') {
+                        return [product, innerProduct];
+                    } else { // Future admin or guest things, add here
+                        throw new Error('Account error');
+                    }
                });
            });
         }).then((result) => {
@@ -166,8 +166,8 @@ module.exports = function() {
                 var allowedUsers = [user.userId];
                 if (user.type === 'collaborator') {
                     return user.getOwners({transaction: t}).then((owners) => {
-                       var ownerIds = _.map(owners, (owner) => owner.userId);
-                       return resolve(allowedUsers.concat(ownerIds));
+                        var ownerIds = _.map(owners, (owner) => owner.userId);
+                        return resolve(allowedUsers.concat(ownerIds));
                     }).catch((err) => reject(err));
                 } else {
                     return resolve(allowedUsers);
@@ -198,7 +198,6 @@ module.exports = function() {
     router.delete('/:productType/:id', function(req, res) {
         var user = req.user;
         var product = req.product;
-        var options = req.body;
 
         sequelize.transaction((t) => {
             return new Promise((resolve, reject) => {
@@ -215,27 +214,25 @@ module.exports = function() {
                 if (!_.contains(allowedUsers, product.userId)) { // Add admin permission here
                     throw new Error('You do not have permission to manage this product');
                 } else {
-                    if (options.parcelId) {
-                        return product.getParcels({transaction: t}).then((parcels) => {
-                            if (parcels.length > 1) {
+                    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
+                        var productPlain = product.get({plain: true});
+                        var innerProductPlain = innerProduct.get({plain: true});
 
-                                return Parcel.findOne({where: {parcelId: options.parcelId}}, {transaction: t}).then((parcel) => {
-                                    return product.removeParcel(parcel)
-                                }).then(() => getInnerProduct(product, t)).then((innerProduct) => {
-                                    return [product, innerProduct];
-                                });
-                            }
+                        // Combine both general and specific product
+                        _.extend(productPlain, innerProductPlain);
+                        productPlain = _.omit(productPlain, ommitedProductFields);
 
-                            return getInnerProduct(product, t).then((innerProduct) => {
-                                // Remove from the system
-                                return deleteProduct(innerProduct, t, product);
+                        // Mixed response
+                        var response = {};
+                        response[product.type] = productPlain;
+
+                        // Remove from the system
+
+                        return innerProduct.destroy({transaction: t}).then(() => {
+                            return product.destroy({transaction: t}).then(() => {
+                                return [product, innerProduct];
                             });
                         });
-                    }
-
-                    return getInnerProduct(product, t).then((innerProduct) => {
-                        // Remove from the system
-                        return deleteProduct(innerProduct, t, product);
                     });
                 }
             });
@@ -264,31 +261,6 @@ module.exports = function() {
 
     return router;
 };
-
-function getInnerProduct(product, t) {
-    return product.getInnerProduct({transaction: t}).then((innerProduct) => {
-        var productPlain = product.get({plain: true});
-        var innerProductPlain = innerProduct.get({plain: true});
-
-        // Combine both general and specific product
-        _.extend(productPlain, innerProductPlain);
-        productPlain = _.omit(productPlain, ommitedProductFields);
-
-        // Mixed response
-        var response = {};
-        response[product.type] = productPlain;
-
-        return innerProduct;
-    });
-}
-
-function deleteProduct(innerProduct, t, product) {
-    return innerProduct.destroy({transaction: t}).then(() => {
-        return product.destroy({transaction: t}).then(() => {
-            return [product, innerProduct];
-        });
-    });
-}
 
 function sendProductIfNeeded(product, user) {
     if (product.product.shared === true) {
