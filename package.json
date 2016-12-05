@@ -1,7 +1,7 @@
 {
-  "name": "ermes-node-server",
-  "version": "0.0.7",
-  "description": "This is the server for the Ermes RESTful API.",
+  "name": "ermes-rest-api",
+  "version": "1.0.0",
+  "description": "Ermes REST API offers several backend services to support ERMES browser and mobile applications.",
   "dependencies": {
     "app-module-path": "^1.0.4",
     "bcrypt-nodejs": "0.0.3",
@@ -33,12 +33,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nachomiralles/dataAPI-prototype-refactor.git"
+    "url": "https://github.com/GeoTecINIT/ermes-rest-api.git"
   },
   "scripts": {
     "start": "node server.js"
   },
-  "private": true,
+  "private": false,
   "main": "server.js",
   "devDependencies": {
     "chai": "^3.5.0",
